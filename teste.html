@@ -1,19 +1,16 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>VHS Glitch</title>
   <style>
-    @font-face {
-      font-family: "VCR OSD Mono";
-      src: url("//works.rocheclement.fr/portraitchinois/fonts/VCR.ttf");
-    }
+    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
     body {
       margin: 0;
       padding: 0;
-      font-family: "VCR OSD Mono", monospace;
+      font-family: 'Press Start 2P', monospace;
       background-color: black;
       color: lightgrey;
       overflow: hidden;
@@ -36,23 +33,13 @@
       filter: contrast(1.2) brightness(1.1);
     }
 
-    .glitch-img {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      animation: glitch 3s infinite;
-    }
-
     .glitch-rgb {
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background-image: url("imagens/Iluminati2.png");
+      background-image: url("imagens/Iluminati.png");
       background-size: cover;
       mix-blend-mode: screen;
       animation: rgbShift 0.2s infinite;
@@ -65,25 +52,7 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background-image: repeating-linear-gradient(
-        to bottom,
-        rgba(162, 0, 255, 0.05) 0px,
-        rgba(0, 0, 0, 0) 1px,
-        transparent 3px
-      );
-      z-index: 10;
-      animation: flicker 0.2s infinite;
       pointer-events: none;
-    }
-
-    @keyframes glitch {
-      0% { clip-path: inset(0 0 0 0); transform: translate(0, 0); }
-      10% { clip-path: inset(10% 0 80% 0); transform: translate(-5px, -2px); }
-      20% { clip-path: inset(15% 0 70% 0); transform: translate(5px, 2px); }
-      30% { clip-path: inset(20% 0 60% 0); transform: translate(-3px, 1px); }
-      40% { clip-path: inset(25% 0 55% 0); transform: translate(3px, -1px); }
-      50% { clip-path: inset(0 0 0 0); transform: translate(0, 0); }
-      100% { clip-path: inset(0 0 0 0); transform: translate(0, 0); }
     }
 
     @keyframes rgbShift {
@@ -92,17 +61,145 @@
       100% { transform: translate(-2px, 2px); filter: hue-rotate(-30deg); }
     }
 
-    @keyframes flicker {
-      0%, 100% { opacity: 0.05; }
-      50% { opacity: 0.15; }
+    /* Responsividade */
+    @media (max-width: 600px) {
+      .glitch-container {
+        width: 100px;
+        height: 100px;
+      }
     }
   </style>
 </head>
-<body>
+<body onclick="changeBackground();">
+  <video id="bgVideo" class="bg-video" autoplay muted loop>
+    <source src="./videos/inicio1.gif" type="video/gif">
+  </video>
+
   <div class="glitch-container">
-    <img src="imagens/Illuminati.webp" class="glitch-img" alt="Glitch Image" />
     <div class="glitch-rgb"></div>
     <div class="scanlines"></div>
   </div>
+
+  <!-- Elementos de Áudio -->
+  <audio id="sfx-navegar" src="audios/navegar.mp3"></audio>
+  <audio id="sfx-selecionar" src="audios/selecionar.mp3"></audio>
+  <audio id="menu-appear-sfx" src="audios/menu_aparecer.mp3"></audio>
+  <audio id="bg-audio-1" src="audios/bg1.mp3" loop></audio>
+  <audio id="bg-audio-2" src="audios/bg2.mp3" loop></audio>
+  <audio id="sfx-enter" src="audios/enter.mp3"></audio>
+
+  <script>
+    const menuItems = document.querySelectorAll('.menu-item');
+    const bgVideo = document.getElementById('bgVideo');
+    const menuContainer = document.querySelector('.menu-container');
+    const sfxNavegar = document.getElementById('sfx-navegar');
+    const sfxSelecionar = document.getElementById('sfx-selecionar');
+    const sfxMenuAppear = document.getElementById('menu-appear-sfx');
+    const bgAudio1 = document.getElementById('bg-audio-1');
+    const bgAudio2 = document.getElementById('bg-audio-2');
+    const sfxEnter = document.getElementById('sfx-enter'); 
+    let selectedIndex = 0;
+    let hasChanged = false;
+
+    function updateSelection() {
+        menuItems.forEach((item, index) => {
+            if (!item.classList.contains('fixed-selected')) {
+                item.classList.toggle('selected', index === selectedIndex);
+            }
+        });
+    }
+
+    function changeBackground() {
+        if (hasChanged) return;
+        hasChanged = true;
+        const newSource = document.createElement('source');
+        newSource.src = 'videos/inicio2.gif';
+        newSource.type = 'video/mp4';
+        bgVideo.innerHTML = '';
+        bgVideo.appendChild(newSource);
+        bgVideo.loop = false;
+        bgVideo.load();
+        bgVideo.play();
+        if (menuContainer) {
+          menuContainer.classList.add('visible');
+        }
+        if (sfxMenuAppear) {
+          sfxMenuAppear.currentTime = 0;
+          sfxMenuAppear.play();
+        }
+        if (bgAudio1) {
+          bgAudio1.pause();
+        }
+        if (bgAudio2) {
+          bgAudio2.currentTime = 0;
+          bgAudio2.play();
+        }
+    }
+
+    document.body.addEventListener('click', changeBackground);
+
+    document.addEventListener('keydown', (e) => {
+        if (!hasChanged) return;
+        let prevIndex = selectedIndex;
+        if (e.key === 'ArrowDown') {
+            selectedIndex = (selectedIndex + 1) % menuItems.length;
+        } else if (e.key === 'ArrowUp') {
+            selectedIndex = (selectedIndex - 1 + menuItems.length) % menuItems.length;
+        } else if (e.key === 'Enter') {
+            if (sfxEnter) {
+              sfxEnter.currentTime = 0;
+              sfxEnter.play();
+            }
+            const selectedItem = menuItems[selectedIndex].textContent.trim().toLowerCase().replace(/ /g, '');
+            if (!selectedItem) return;
+            if (sfxSelecionar) {
+              sfxSelecionar.currentTime = 0;
+              sfxSelecionar.play();
+            }
+            setTimeout(() => {
+                window.location.href = `${selectedItem}.html`;
+            }, 300);
+        }
+        if (prevIndex !== selectedIndex) {
+            updateSelection();
+            if (sfxNavegar) {
+              sfxNavegar.currentTime = 0;
+              sfxNavegar.play();
+            }
+        }
+    });
+
+    updateSelection();
+
+    window.addEventListener('DOMContentLoaded', () => {
+        if (bgAudio1) {
+          bgAudio1.volume = 0.2;
+          bgAudio1.play().catch((error) => {
+              console.warn('Autoplay bloqueado. Tente clicar na tela para ativar o som.');
+          });
+        }
+        if (bgAudio2) {
+          bgAudio2.volume = 0.1;
+        }
+        if (sfxNavegar) {
+          sfxNavegar.volume = 0.2;
+        }
+        if (sfxEnter) {
+          sfxEnter.volume = 0.2;
+        }
+    });
+
+    function startAudio() {
+        if (bgAudio1) {
+          bgAudio1.play().catch((err) => {
+              console.warn("Autoplay bloqueado:", err);
+          });
+        }
+        document.removeEventListener('click', startAudio);
+        document.removeEventListener('keydown', startAudio);
+    }
+    document.addEventListener('click', startAudio);
+    document.addEventListener('keydown', startAudio);
+  </script>
 </body>
 </html>
