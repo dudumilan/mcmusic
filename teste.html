@@ -3,19 +3,20 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>VHS Glitch</title>
+  <title>MCmusic</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+    @font-face {
+      font-family: "VCR OSD Mono";
+      src: url("//works.rocheclement.fr/portraitchinois/fonts/VCR.ttf");
+    }
 
     body {
       margin: 0;
       padding: 0;
-      font-family: 'Press Start 2P', monospace;
+      font-family: "VCR OSD Mono", monospace;
       background-color: black;
       color: lightgrey;
       overflow: hidden;
-      background-image: url("https://68.media.tumblr.com/595a5fa01fe53ca0e4ca8f37bacc849d/tumblr_nve67mJtue1tanofjo1_500.gif");
-      background-size: cover;
       text-shadow: black 2px 2px 1px, black -2px 2px 1px,
                    black -2px -2px 1px, black 2px -2px 1px,
                    black 0px 2px 1px, black 0px -2px 1px,
@@ -24,6 +25,16 @@
       align-items: center;
       justify-content: center;
       height: 100vh;
+    }
+
+    video.bg-video {
+      position: fixed;
+      top: 0;
+      left: 0;
+      min-width: 100%;
+      min-height: 100%;
+      object-fit: cover;
+      z-index: -1;
     }
 
     .glitch-container {
@@ -44,6 +55,15 @@
       mix-blend-mode: screen;
       animation: rgbShift 0.2s infinite;
       opacity: 0.3;
+      bottom: 220px;
+      display: none;
+      flex-direction: column;
+      gap: 35px;
+      padding: 30px 50px;
+      border-radius: 12px;
+      z-index: 1;
+      transform: translateY(20px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
     }
 
     .scanlines {
@@ -60,146 +80,58 @@
       50% { transform: translate(2px, -2px); filter: hue-rotate(30deg); }
       100% { transform: translate(-2px, 2px); filter: hue-rotate(-30deg); }
     }
-
-    /* Responsividade */
-    @media (max-width: 600px) {
-      .glitch-container {
-        width: 100px;
-        height: 100px;
-      }
-    }
   </style>
 </head>
 <body onclick="changeBackground();">
   <video id="bgVideo" class="bg-video" autoplay muted loop>
-    <source src="./videos/inicio1.gif" type="video/gif">
+    <source src="./videos/inicio1.mp4" type="video/mp4">
+    Seu navegador não suporta o elemento de vídeo.
   </video>
-
   <div class="glitch-container">
     <div class="glitch-rgb"></div>
     <div class="scanlines"></div>
   </div>
 
-  <!-- Elementos de Áudio -->
+  <!-- Elementos de áudio -->
   <audio id="sfx-navegar" src="audios/navegar.mp3"></audio>
   <audio id="sfx-selecionar" src="audios/selecionar.mp3"></audio>
-  <audio id="menu-appear-sfx" src="audios/menu_aparecer.mp3"></audio>
+  <audio id="menu-appear-sfx" src="audios/menu-aparecer.mp3"></audio>
   <audio id="bg-audio-1" src="audios/bg1.mp3" loop></audio>
   <audio id="bg-audio-2" src="audios/bg2.mp3" loop></audio>
   <audio id="sfx-enter" src="audios/enter.mp3"></audio>
 
   <script>
-    const menuItems = document.querySelectorAll('.menu-item');
     const bgVideo = document.getElementById('bgVideo');
-    const menuContainer = document.querySelector('.menu-container');
-    const sfxNavegar = document.getElementById('sfx-navegar');
-    const sfxSelecionar = document.getElementById('sfx-selecionar');
     const sfxMenuAppear = document.getElementById('menu-appear-sfx');
     const bgAudio1 = document.getElementById('bg-audio-1');
     const bgAudio2 = document.getElementById('bg-audio-2');
-    const sfxEnter = document.getElementById('sfx-enter'); 
-    let selectedIndex = 0;
     let hasChanged = false;
 
-    function updateSelection() {
-        menuItems.forEach((item, index) => {
-            if (!item.classList.contains('fixed-selected')) {
-                item.classList.toggle('selected', index === selectedIndex);
-            }
-        });
-    }
-
     function changeBackground() {
-        if (hasChanged) return;
-        hasChanged = true;
-        const newSource = document.createElement('source');
-        newSource.src = 'videos/inicio2.gif';
-        newSource.type = 'video/mp4';
-        bgVideo.innerHTML = '';
-        bgVideo.appendChild(newSource);
-        bgVideo.loop = false;
-        bgVideo.load();
-        bgVideo.play();
-        if (menuContainer) {
-          menuContainer.classList.add('visible');
-        }
-        if (sfxMenuAppear) {
-          sfxMenuAppear.currentTime = 0;
-          sfxMenuAppear.play();
-        }
-        if (bgAudio1) {
-          bgAudio1.pause();
-        }
-        if (bgAudio2) {
-          bgAudio2.currentTime = 0;
-          bgAudio2.play();
-        }
+      if (hasChanged) return;
+      hasChanged = true;
+      bgVideo.src = 'videos/inicio2.mp4';
+      bgVideo.load();
+      bgVideo.play();
+      sfxMenuAppear.currentTime = 0;
+      sfxMenuAppear.play();
+      bgAudio1.pause();
+      bgAudio2.currentTime = 0;
+      bgAudio2.play();
     }
-
-    document.body.addEventListener('click', changeBackground);
-
-    document.addEventListener('keydown', (e) => {
-        if (!hasChanged) return;
-        let prevIndex = selectedIndex;
-        if (e.key === 'ArrowDown') {
-            selectedIndex = (selectedIndex + 1) % menuItems.length;
-        } else if (e.key === 'ArrowUp') {
-            selectedIndex = (selectedIndex - 1 + menuItems.length) % menuItems.length;
-        } else if (e.key === 'Enter') {
-            if (sfxEnter) {
-              sfxEnter.currentTime = 0;
-              sfxEnter.play();
-            }
-            const selectedItem = menuItems[selectedIndex].textContent.trim().toLowerCase().replace(/ /g, '');
-            if (!selectedItem) return;
-            if (sfxSelecionar) {
-              sfxSelecionar.currentTime = 0;
-              sfxSelecionar.play();
-            }
-            setTimeout(() => {
-                window.location.href = `${selectedItem}.html`;
-            }, 300);
-        }
-        if (prevIndex !== selectedIndex) {
-            updateSelection();
-            if (sfxNavegar) {
-              sfxNavegar.currentTime = 0;
-              sfxNavegar.play();
-            }
-        }
-    });
-
-    updateSelection();
-
-    window.addEventListener('DOMContentLoaded', () => {
-        if (bgAudio1) {
-          bgAudio1.volume = 0.2;
-          bgAudio1.play().catch((error) => {
-              console.warn('Autoplay bloqueado. Tente clicar na tela para ativar o som.');
-          });
-        }
-        if (bgAudio2) {
-          bgAudio2.volume = 0.1;
-        }
-        if (sfxNavegar) {
-          sfxNavegar.volume = 0.2;
-        }
-        if (sfxEnter) {
-          sfxEnter.volume = 0.2;
-        }
-    });
 
     function startAudio() {
-        if (bgAudio1) {
-          bgAudio1.play().catch((err) => {
-              console.warn("Autoplay bloqueado:", err);
-          });
-        }
-        document.removeEventListener('click', startAudio);
-        document.removeEventListener('keydown', startAudio);
+      bgAudio1.play().catch((err) => {
+        console.warn("Autoplay bloqueado:", err);
+      });
+      document.removeEventListener('click', startAudio);
+      document.removeEventListener('keydown', startAudio);
     }
-    document.addEventListener('click', startAudio);
-    document.addEventListener('keydown', startAudio);
+
+    window.addEventListener('DOMContentLoaded', () => {
+      document.addEventListener('click', startAudio);
+      document.addEventListener('keydown', startAudio);
+    });
   </script>
 </body>
 </html>
