@@ -5,6 +5,9 @@
   <video id="bgVideo" class="bg-video" autoplay muted>
     <source src="./videos/inicio1.mp4" type="video/mp4">
   </video>
+  <audio id="sfx-navegar" src="audios/done.wav" preload="auto"></audio>
+  <audio id="sfx-selecionar" src="audios/end.wav" preload="auto"></audio>
+  <audio id="menu-appear-sfx" src="sfx/menu-appear.mp3" preload="auto"></audio>
   <div class="glitch-container">
     <div class="glitch-rgb"></div>
     <div class="scanlines"></div>
@@ -13,13 +16,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>MCmusic</title>
   <div class="menu-container">
-    <div class="menu-item selected">PLAY</div>
+    <div class="menu-item selected"></div>
+    <div class="menu-item">PLAY</div>
 </div>
   <style>
     @font-face {
       font-family: "VCR OSD Mono";
-      src: url("//works.rocheclement.fr/portraitchinois/fonts/VCR.ttf");
+      src: url("fonts/VCR_OSD_MONO.ttf") format("truetype");
     }
+
 
     body {
       margin: 0;
@@ -28,10 +33,7 @@
       background-color: black;
       color: lightgrey;
       overflow: hidden;
-      text-shadow: black 2px 2px 1px, black -2px 2px 1px,
-                   black -2px -2px 1px, black 2px -2px 1px,
-                   black 0px 2px 1px, black 0px -2px 1px,
-                   black 2px 0px 1px, black -2px 0px 1px;
+      
       display: flex;
       align-items: center;
       justify-content: center;
@@ -98,7 +100,7 @@
     }
     .menu-container {
     position: absolute;
-    bottom: 765px;
+    bottom: 740px;
     left: 165px;
 
     display: none;
@@ -124,6 +126,14 @@
     transition: all 0.3s ease-in-out;
     cursor: pointer;
     transform: scaleY(2.0);
+  }
+  .menu-item:hover,
+  .menu-item.selected {
+    opacity: 1;
+    transform: scaleY(2.0) translate(30px);
+    
+    -webkit-text-stroke: 1.0px #000000;
+    text-shadow: 1.5px #ffffff;
   }
   .menu-item.fixed-selected::before {
     content: '';
@@ -235,18 +245,28 @@
     });
 
     updateSelection(); 
+    bgAudio1.volume = 0.2;
+            bgAudio2.volume = 0.1;
+            sfxNavegar.volume = 0.2;
+            sfxEnter.volume = 0.2;
     function startAudio() {
     bgAudio1.play().catch((err) => {
         console.warn("Autoplay bloqueado:", err);
     });
+    bgAudio1.loop = false;
+        bgAudio1.volume = 0.2;
+
+        function startAudio() {
     document.removeEventListener('click', startAudio);
     document.removeEventListener('keydown', startAudio);
-}
+}}
 
     window.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('click', startAudio);
     document.addEventListener('keydown', startAudio);
 });
+setTimeout(myGreeting, 3000);
+
 
     </script>
 </body>
