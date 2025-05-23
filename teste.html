@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Teste Enter</title>
+  <style>
+    .menu-item {
+      padding: 20px;
+      background-color: #007bff;
+      color: white;
+      width: 100px;
+      text-align: center;
+      cursor: pointer;
+      outline: none;
+    }
+    .menu-item:focus {
+      box-shadow: 0 0 0 3px rgba(0,123,255,0.5);
+    }
+  </style>
+</head>
+<body>
+  <div class="menu-item" id="btnPlay" tabindex="0" role="button"> PLAY</div>
+
+  <script>
+    const btnPlay = document.getElementById("btnPlay");
+
+    btnPlay.addEventListener("keypress", function(event) {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        mudarVideo();
+      }
+    });
+
+    btnPlay.addEventListener("click", mudarVideo);
+
+    function mudarVideo() {
+      alert("CLIQUEI NO ENTER");
+    }
+
+    // Opcional: definir o foco automaticamente na div ao carregar a página
+    window.addEventListener("load", () => {
+      btnPlay.focus();
+    });
+  </script>
+</body>
+</html>
