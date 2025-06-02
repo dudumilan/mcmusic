@@ -2,45 +2,64 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Teste Enter</title>
+  <title>Busca de Músicas</title>
   <style>
-    .menu-item {
-      padding: 20px;
-      background-color: #007bff;
-      color: white;
-      width: 100px;
-      text-align: center;
-      cursor: pointer;
-      outline: none;
+    body {
+      font-family: Arial, sans-serif;
+      margin: 2rem;
     }
-    .menu-item:focus {
-      box-shadow: 0 0 0 3px rgba(0,123,255,0.5);
+    input {
+      padding: 8px;
+      width: 100%;
+      max-width: 400px;
+      margin-bottom: 1rem;
+      font-size: 16px;
+    }
+    ul {
+      list-style: none;
+      padding-left: 0;
+    }
+    li {
+      padding: 8px;
+      border-bottom: 1px solid #ccc;
+    }
+    li.hidden {
+      display: none;
     }
   </style>
 </head>
 <body>
-  <div class="menu-item" id="btnPlay" tabindex="0" role="button"> PLAY</div>
+
+  <h2>Buscar Músicas</h2>
+  <input type="text" id="searchInput" placeholder="Digite o nome da música...">
+
+  <ul id="musicList">
+    <li>Shape of You</li>
+    <li>Blinding Lights</li>
+    <li>Bohemian Rhapsody</li>
+    <li>Hotel California</li>
+    <li>Imagine</li>
+    <li>Despacito</li>
+    <li>Someone Like You</li>
+    <li>Perfect</li>
+    <li>Smells Like Teen Spirit</li>
+    <li>Billie Jean</li>
+  </ul>
 
   <script>
-    const btnPlay = document.getElementById("btnPlay");
+    const searchInput = document.getElementById('searchInput');
+    const musicList = document.getElementById('musicList');
+    const items = musicList.getElementsByTagName('li');
 
-    btnPlay.addEventListener("keypress", function(event) {
-      if (event.key === "Enter") {
-        event.preventDefault();
-        mudarVideo();
-      }
-    });
+    searchInput.addEventListener('input', () => {
+      const query = searchInput.value.toLowerCase();
 
-    btnPlay.addEventListener("click", mudarVideo);
-
-    function mudarVideo() {
-      alert("CLIQUEI NO ENTER");
-    }
-
-    // Opcional: definir o foco automaticamente na div ao carregar a página
-    window.addEventListener("load", () => {
-      btnPlay.focus();
+      Array.from(items).forEach(item => {
+        const text = item.textContent.toLowerCase();
+        item.classList.toggle('hidden', !text.includes(query));
+      });
     });
   </script>
+
 </body>
 </html>

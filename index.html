@@ -578,14 +578,17 @@
                 funcoes.renderizarArtistas();
                 funcoes.renderizarPlaylists();
                 
-                // Event listeners
                 elementos.btnNovaPlaylist.addEventListener('click', funcoes.abrirModalCriarPlaylist);
                 elementos.fecharModal.addEventListener('click', funcoes.fecharModalCriarPlaylist);
                 elementos.cancelarPlaylist.addEventListener('click', funcoes.fecharModalCriarPlaylist);
                 elementos.salvarPlaylist.addEventListener('click', funcoes.criarPlaylist);
                 elementos.fecharModalAdicionar.addEventListener('click', funcoes.fecharModalAdicionarPlaylist);
                 elementos.cancelarAdicionar.addEventListener('click', funcoes.fecharModalAdicionarPlaylist);
-                
+                elementos.campoBusca.addEventListener('input', (e) => {
+                    const termo = e.target.value;
+                    funcoes.buscarMusicas(termo);
+                });
+
                 elementos.btnPlay.addEventListener('click', () => {
                     if (estado.isPlaying) {
                         funcoes.pausarMusica();
