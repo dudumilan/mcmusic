@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+
+    <form onsubmit="event.preventDefault();">
+        <input type="text" placeholder="O que você está procurando?" id="busca">
+        <select name="tipo" id="tipo">
+            <option value="album">Album</option>
+            <option value="artist">Artista</option>
+            <!-- "artist", "playlist", "track", "show", "episode", "audiobook" -->
+        </select>
+        <button onclick="getSearchMusics()">PESQUISAR</button>
+    </form>
+
+
+    <script>
+        // Authorization token that must have been created previously. See : https://developer.spotify.com/documentation/web-api/concepts/authorization
+        const token = 'BQDjt02kVthkHQN_ceQoDuVa9wZVFbmdFNQRiR6JGdRgyt98O1APfm3LszXW9YJiNg16r9sg8HPUSWXpNuDxcuhjHh42uKdbESSWDvHhLmqjkuOVhHfEDj2OhCHZ6xkld-WTNxx9mif6-1rhAjPfV_Gt8mxho0wcyzwPMKu3tkvR5FVN0N3zws0icRVLueOaG0bVaDqyeEfgWGzSJBmkcwDTchaMxvmv3E44Jk242gt-jsZokRURWxj_ZZQPNOKkgq9qU8q0m_fZeG9-oyf-q0hKU4_afK4EDizBb0XuLcUwb-K6iF0Tp3kEFXwc';
+        async function fetchWebApi(endpoint, method, body) {
+        const res = await fetch(`https://api.spotify.com/${endpoint}`, {
+            headers: {
+            Authorization: `Bearer ${token}`,
+            },
+            method,
+            body:JSON.stringify(body)
+        });
+        return await res.json();
+        }
+
+    
+        async function getSearchMusics(){
+        let pesquisa = document.getElementById("busca");
+        let tipo = document.getElementById("tipo");
+        // Endpoint reference : https://developer.spotify.com/documentation/web-api/reference/get-users-top-artists-and-tracks
+        return (await fetchWebApi(
+            'v1/search?q=`${pesquisa.value}`&type=${tipo.value}', 'GET'
+        )).items;
+        }
+
+
+    </script>
+
+</body>
+</html>
