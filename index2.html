@@ -262,7 +262,7 @@
     <script>
         
         const musicas = [
-            { id: 1, nome: "We Are The Champions ", artista: "Queen", duracao: "3:10", capa: "../imagens/we are the champions.jpg" },
+            { id: 1, nome: "We Are The Champions ", artista: "Queen", duracao: "190", capa: "../imagens/we are the champions.jpg" },
             { id: 2, nome: "Imagine", artista: "John Lennon", duracao: "3:04", capa: "https://i.scdn.co/image/ab67616d00001e02b1c4b76e23414c9f20242268" },
             { id: 3, nome: "Billie Jean", artista: "Michael Jackson", duracao: "4:54", capa: "https://i.scdn.co/image/ab67616d00001e02e11a75a2f2ff39cec27a1d07" },
             { id: 4, nome: "Like a Rolling Stone", artista: "Bob Dylan", duracao: "6:13", capa: "https://i.scdn.co/image/ab67616d00001e02e8b907dcfb5e2c51785e7b03" },
@@ -452,47 +452,50 @@
                 });
             },
             
-            tocarMusica: (id) => {
+                        tocarMusica: (id) => {
                 const musica = musicas.find(m => m.id === id);
                 if (!musica) return;
-                
+
                 estado.musicaAtual = musica;
                 estado.isPlaying = true;
                 estado.progresso = 0;
-                
+
                 
                 elementos.nomeMusicaAtual.textContent = musica.nome;
                 elementos.artistaMusicaAtual.textContent = musica.artista;
                 elementos.capaMusicaAtual.src = musica.capa;
                 elementos.tempoTotal.textContent = musica.duracao;
-                
+
                 
                 elementos.btnPlay.innerHTML = `
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-black" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
                     </svg>
                 `;
-                
+
                 
                 if (estado.intervaloProgresso) {
                     clearInterval(estado.intervaloProgresso);
                 }
-                
+
+                const duracaoSegundos = 180; 
                 estado.intervaloProgresso = setInterval(() => {
+                    if (!estado.isPlaying) return;
+
+                    estado.progresso += 100 / duracaoSegundos;
+
                     if (estado.progresso >= 100) {
+                        estado.progresso = 100;
                         clearInterval(estado.intervaloProgresso);
-                        return;
                     }
-                    
-                    estado.progresso += 0.5;
+
                     elementos.barraProgresso.value = estado.progresso;
-                    
-                    
-                    const segundosTotais = 30; 
-                    const segundosAtuais = Math.floor(segundosTotais * (estado.progresso / 100));
-                    elementos.tempoAtual.textContent = `0:${segundosAtuais < 10 ? '0' + segundosAtuais : segundosAtuais}`;
+
+                    const segundosAtuais = Math.floor(duracaoSegundos * (estado.progresso / 100));
+                    elementos.tempoAtual.textContent = `${segundosAtuais < 10 ? '0' + segundosAtuais : segundosAtuais}`;
                 }, 1000);
             },
+
             
             pausarMusica: () => {
                 estado.isPlaying = false;
