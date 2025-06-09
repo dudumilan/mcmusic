@@ -262,14 +262,15 @@
     <script>
         
         const musicas = [
-            { id: 1, nome: "We Are The Champions ", artista: "Queen", duracao: "190", capa: "../imagens/we are the champions.jpg" },
-            { id: 2, nome: "Imagine", artista: "John Lennon", duracao: "3:04", capa: "https://i.scdn.co/image/ab67616d00001e02b1c4b76e23414c9f20242268" },
-            { id: 3, nome: "Billie Jean", artista: "Michael Jackson", duracao: "4:54", capa: "https://i.scdn.co/image/ab67616d00001e02e11a75a2f2ff39cec27a1d07" },
+            { id: 1, nome: "We Are The Champions ", artista: "Queen", duracao: "3:10", capa: "../imagens/we are the champions.jpg" },
+            { id: 2, nome: "Evidências", artista: "Chitãozinho & Xororó", duracao: "4:41", capa: "../imagens/evidencias.jpg" },
+            { id: 3, nome: "I Ran", artista: "A Flock Of Seagulls", duracao: "3:58", capa: "../imagens/i ran.jpg" },
             { id: 4, nome: "Like a Rolling Stone", artista: "Bob Dylan", duracao: "6:13", capa: "https://i.scdn.co/image/ab67616d00001e02e8b907dcfb5e2c51785e7b03" },
-            { id: 5, nome: "Smells Like Teen Spirit", artista: "Nirvana", duracao: "5:01", capa: "https://i.scdn.co/image/ab67616d00001e02d6fb1e2e2c2d4e9a3ca2f819" },
-            { id: 6, nome: "One", artista: "U2", duracao: "4:36", capa: "https://i.scdn.co/image/ab67616d00001e02d29fe8c4ffa7e92ae56e38c2" },
+            { id: 5, nome: "Tem Culpa Eu?", artista: "MC LUUKY", duracao: "2:59", capa: "https://image-cdn-ak.spotifycdn.com/image/ab67706c0000da84cd3de32aecb5968cdfbe9e98" },
+            { id: 6, nome: "Além do Horizonte", artista: " Roberto Carlos", duracao: "4:36", capa: "https://i.ytimg.com/vi/XjjOz-QBQNM/maxresdefault.jpg" },
             { id: 7, nome: "Yesterday", artista: "The Beatles", duracao: "2:05", capa: "https://i.scdn.co/image/ab67616d00001e02a4fce8b8352c7c0d19a10948" },
             { id: 8, nome: "Sweet Child O'Mine", artista: "Guns N' Roses", duracao: "5:56", capa: "https://i.scdn.co/image/ab67616d00001e02a4fce8b8352c7c0d19a10948" }
+
         ];
 
         musicas.forEach(artist => {
@@ -478,7 +479,7 @@
                     clearInterval(estado.intervaloProgresso);
                 }
 
-                const duracaoSegundos = 180; 
+                const duracaoSegundos = 60; 
                 estado.intervaloProgresso = setInterval(() => {
                     if (!estado.isPlaying) return;
 
@@ -492,7 +493,7 @@
                     elementos.barraProgresso.value = estado.progresso;
 
                     const segundosAtuais = Math.floor(duracaoSegundos * (estado.progresso / 100));
-                    elementos.tempoAtual.textContent = `${segundosAtuais < 10 ? '0' + segundosAtuais : segundosAtuais}`;
+                    elementos.tempoAtual.textContent = `${segundosAtuais < 100 ? '0' + segundosAtuais : segundosAtuais}`;
                 }, 1000);
             },
 
