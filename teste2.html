@@ -6,44 +6,341 @@
     <title>Document</title>
 </head>
 <body>
-
-    <form onsubmit="event.preventDefault();">
-        <input type="text" placeholder="O que você está procurando?" id="busca">
-        <select name="tipo" id="tipo">
-            <option value="album">Album</option>
-            <option value="artist">Artista</option>
-            <!-- "artist", "playlist", "track", "show", "episode", "audiobook" -->
-        </select>
-        <button onclick="getSearchMusics()">PESQUISAR</button>
-    </form>
-
-
     <script>
-        // Authorization token that must have been created previously. See : https://developer.spotify.com/documentation/web-api/concepts/authorization
-        const token = 'BQDjt02kVthkHQN_ceQoDuVa9wZVFbmdFNQRiR6JGdRgyt98O1APfm3LszXW9YJiNg16r9sg8HPUSWXpNuDxcuhjHh42uKdbESSWDvHhLmqjkuOVhHfEDj2OhCHZ6xkld-WTNxx9mif6-1rhAjPfV_Gt8mxho0wcyzwPMKu3tkvR5FVN0N3zws0icRVLueOaG0bVaDqyeEfgWGzSJBmkcwDTchaMxvmv3E44Jk242gt-jsZokRURWxj_ZZQPNOKkgq9qU8q0m_fZeG9-oyf-q0hKU4_afK4EDizBb0XuLcUwb-K6iF0Tp3kEFXwc';
-        async function fetchWebApi(endpoint, method, body) {
-        const res = await fetch(`https://api.spotify.com/${endpoint}`, {
-            headers: {
-            Authorization: `Bearer ${token}`,
-            },
-            method,
-            body:JSON.stringify(body)
-        });
-        return await res.json();
-        }
-
+    class MCMusicPlayer {
+        constructor(musicas, artistas, playlists) {
+            this.musicas = musicas;
+            this.artistas = artistas;
+            this.playlists = playlists;
+            this.estado = {
+                musicaAtual: null,
+                playlists: playlists,
+                playlistsSidebar: playlists,
+                playlistsModal: [],
+                musicaParaAdicionar: null,
+                isPlaying: false,
+                progresso: 0,
+                intervaloProgresso: null,
+                audioElement: new Audio() // Adicionado elemento de áudio
+            };
     
-        async function getSearchMusics(){
-        let pesquisa = document.getElementById("busca");
-        let tipo = document.getElementById("tipo");
-        // Endpoint reference : https://developer.spotify.com/documentation/web-api/reference/get-users-top-artists-and-tracks
-        return (await fetchWebApi(
-            'v1/search?q=`${pesquisa.value}`&type=${tipo.value}', 'GET'
-        )).items;
+            this.elementos = {
+                containerMusicas: document.getElementById('container-musicas'),
+                containerArtistas: document.getElementById('container-artistas'),
+                containerPlaylists: document.getElementById('container-playlists'),
+                listaPlaylists: document.getElementById('lista-playlists'),
+                listaPlaylistsModal: document.getElementById('lista-playlists-modal'),
+                btnNovaPlaylist: document.getElementById('btn-nova-playlist'),
+                modalPlaylist: document.getElementById('modal-playlist'),
+                modalAdicionarPlaylist: document.getElementById('modal-adicionar-playlist'),
+                nomePlaylist: document.getElementById('nome-playlist'),
+                salvarPlaylist: document.getElementById('salvar-playlist'),
+                cancelarPlaylist: document.getElementById('cancelar-playlist'),
+                fecharModal: document.getElementById('fechar-modal'),
+                fecharModalAdicionar: document.getElementById('fechar-modal-adicionar'),
+                cancelarAdicionar: document.getElementById('cancelar-adicionar'),
+                musicaSelecionada: document.getElementById('musica-selecionada'),
+                campoBusca: document.getElementById('campo-busca'),
+                nomeMusicaAtual: document.getElementById('nome-musica-atual'),
+                artistaMusicaAtual: document.getElementById('artista-musica-atual'),
+                capaMusicaAtual: document.getElementById('capa-musica-atual'),
+                btnPlay: document.getElementById('btn-play'),
+                barraProgresso: document.getElementById('barra-progresso'),
+                tempoAtual: document.getElementById('tempo-atual'),
+                tempoTotal: document.getElementById('tempo-total')
+            };
         }
-
-
+    
+        renderizarMusicas() {
+            this.elementos.containerMusicas.innerHTML = '';
+            this.musicas.forEach(musica => {
+                const musicaElement = document.createElement('div');
+                musicaElement.className = 'card-musica bg-gray-800 p-4 rounded-lg cursor-pointer hover:bg-gray-700 transition-colors';
+                musicaElement.innerHTML = `
+                    <div class="relative mb-4">
+                        <img src="${musica.capa}" alt="${musica.nome}" class="w-full aspect-square object-cover rounded">
+                        <button class="absolute bottom-2 right-2 bg-green-500 rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity play-btn" data-id="${musica.id}">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-black" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                        <button class="absolute top-2 right-2 bg-black bg-opacity-60 rounded-full p-1.5 adicionar-playlist-btn" data-id="${musica.id}">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                    </div>
+                    <h3 class="texto-principal font-medium truncate">${musica.nome}</h3>
+                    <p class="texto-secundario text-sm truncate">${musica.artista}</p>
+                `;
+                this.elementos.containerMusicas.appendChild(musicaElement);
+            });
+    
+            document.querySelectorAll('.play-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const id = parseInt(btn.getAttribute('data-id'));
+                    this.tocarMusica(id);
+                });
+            });
+    
+            document.querySelectorAll('.adicionar-playlist-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const id = parseInt(btn.getAttribute('data-id'));
+                    this.abrirModalAdicionarPlaylist(id);
+                });
+            });
+    
+            document.querySelectorAll('.card-musica').forEach(card => {
+                card.addEventListener('click', () => {
+                    const id = parseInt(card.querySelector('.play-btn').getAttribute('data-id'));
+                    this.tocarMusica(id);
+                });
+            });
+        }
+    
+        renderizarArtistas() {
+            this.elementos.containerArtistas.innerHTML = '';
+            this.artistas.forEach(artista => {
+                const artistaElement = document.createElement('div');
+                artistaElement.className = 'bg-gray-800 p-4 rounded-full cursor-pointer hover:bg-gray-700 transition-colors text-center';
+                artistaElement.innerHTML = `
+                    <div class="w-full aspect-square mb-3">
+                        <img src="${artista.foto}" alt="${artista.nome}" class="w-full h-full rounded-full object-cover">
+                    </div>
+                    <h3 class="texto-principal font-medium">${artista.nome}</h3>
+                    <p class="texto-secundario text-sm">Artista</p>
+                `;
+                this.elementos.containerArtistas.appendChild(artistaElement);
+            });
+        }
+    
+        renderizarPlaylists() {
+            this.elementos.containerPlaylists.innerHTML = '';
+            this.estado.playlists.forEach(playlist => {
+                const playlistElement = document.createElement('div');
+                playlistElement.className = 'playlist-card p-4 rounded-lg cursor-pointer hover:opacity-90 transition-opacity';
+                playlistElement.innerHTML = `
+                    <div class="mb-3">
+                        <div class="w-full aspect-square bg-black bg-opacity-20 rounded flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+                            </svg>
+                        </div>
+                    </div>
+                    <h3 class="texto-principal font-medium truncate">${playlist.nome}</h3>
+                    <p class="texto-secundario text-sm">${playlist.musicas.length} músicas</p>
+                `;
+                this.elementos.containerPlaylists.appendChild(playlistElement);
+            });
+    
+            this.elementos.listaPlaylists.innerHTML = '';
+            this.estado.playlistsSidebar.forEach(playlist => {
+                const playlistElement = document.createElement('li');
+                playlistElement.className = 'texto-secundario hover:texto-principal cursor-pointer truncate';
+                playlistElement.textContent = playlist.nome;
+                this.elementos.listaPlaylists.appendChild(playlistElement);
+            });
+        }
+    
+        renderizarPlaylistsModal() {
+            this.elementos.listaPlaylistsModal.innerHTML = '';
+            this.estado.playlistsModal.forEach(playlist => {
+                const playlistElement = document.createElement('div');
+                playlistElement.className = 'flex items-center justify-between p-3 hover:bg-gray-700 rounded cursor-pointer';
+                playlistElement.innerHTML = `
+                    <span class="texto-principal">${playlist.nome}</span>
+                    <button class="adicionar-musica-btn px-3 py-1 bg-white bg-opacity-10 rounded-full texto-principal hover:bg-opacity-20" data-id="${playlist.id}">
+                        Adicionar
+                    </button>
+                `;
+                this.elementos.listaPlaylistsModal.appendChild(playlistElement);
+            });
+    
+            document.querySelectorAll('.adicionar-musica-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const playlistId = parseInt(btn.getAttribute('data-id'));
+                    this.adicionarMusicaAPlaylist(playlistId, this.estado.musicaParaAdicionar);
+                });
+            });
+        }
+    
+        tocarMusica(id) {
+            const musica = this.musicas.find(m => m.id === id);
+            if (!musica) return;
+    
+            this.estado.musicaAtual = musica;
+            this.estado.isPlaying = true;
+            this.estado.progresso = 0;
+    
+            this.elementos.nomeMusicaAtual.textContent = musica.nome;
+            this.elementos.artistaMusicaAtual.textContent = musica.artista;
+            this.elementos.capaMusicaAtual.src = musica.capa;
+            this.elementos.tempoTotal.textContent = musica.duracao;
+    
+            this.elementos.btnPlay.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-black" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                </svg>
+            `;
+    
+            if (this.estado.intervaloProgresso) {
+                clearInterval(this.estado.intervaloProgresso);
+            }
+    
+            // Simulação de reprodução (substitua com a lógica de áudio real)
+            const duracaoSegundos = 60; // Usando 60 segundos para simulação
+            this.estado.intervaloProgresso = setInterval(() => {
+                if (!this.estado.isPlaying) return;
+    
+                this.estado.progresso += 100 / duracaoSegundos;
+    
+                if (this.estado.progresso >= 100) {
+                    this.estado.progresso = 100;
+                    clearInterval(this.estado.intervaloProgresso);
+                }
+    
+                this.elementos.barraProgresso.value = this.estado.progresso;
+    
+                const segundosAtuais = Math.floor(duracaoSegundos * (this.estado.progresso / 100));
+                this.elementos.tempoAtual.textContent = `${segundosAtuais < 10 ? '0' : ''}${segundosAtuais}`;
+            }, 1000);
+        }
+    
+    
+        pausarMusica() {
+            this.estado.isPlaying = false;
+            if (this.estado.intervaloProgresso) {
+                clearInterval(this.estado.intervaloProgresso);
+            }
+    
+            this.elementos.btnPlay.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-black" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" />
+                </svg>
+            `;
+        }
+    
+        abrirModalCriarPlaylist() {
+            this.elementos.modalPlaylist.classList.remove('hidden');
+            this.elementos.nomePlaylist.value = '';
+        }
+    
+        fecharModalCriarPlaylist() {
+            this.elementos.modalPlaylist.classList.add('hidden');
+        }
+    
+        abrirModalAdicionarPlaylist(musicaId) {
+            this.estado.musicaParaAdicionar = musicaId;
+            this.estado.playlistsModal = [...this.estado.playlists];
+    
+            const musica = this.musicas.find(m => m.id === musicaId);
+            this.elementos.musicaSelecionada.textContent = `Adicionar "${musica.nome}" à playlist:`;
+    
+            this.renderizarPlaylistsModal();
+            this.elementos.modalAdicionarPlaylist.classList.remove('hidden');
+        }
+    
+        fecharModalAdicionarPlaylist() {
+            this.elementos.modalAdicionarPlaylist.classList.add('hidden');
+        }
+    
+        criarPlaylist() {
+            const nome = this.elementos.nomePlaylist.value.trim();
+            if (!nome) return;
+    
+            const novaPlaylist = {
+                id: this.estado.playlists.length + 1,
+                nome: nome,
+                musicas: []
+            };
+    
+            this.estado.playlists.push(novaPlaylist);
+            this.estado.playlistsSidebar.push(novaPlaylist);
+    
+            this.renderizarPlaylists();
+            this.fecharModalCriarPlaylist();
+        }
+    
+        adicionarMusicaAPlaylist(playlistId, musicaId) {
+            const playlist = this.estado.playlists.find(p => p.id === playlistId);
+            if (!playlist) return;
+    
+            if (!playlist.musicas.includes(musicaId)) {
+                playlist.musicas.push(musicaId);
+    
+                this.renderizarPlaylists();
+                this.fecharModalAdicionarPlaylist();
+    
+                alert(`Música adicionada à playlist "${playlist.nome}"!`);
+            } else {
+                alert('Esta música já está na playlist!');
+            }
+        }
+    
+        buscarMusicas(termo) {
+            console.log('Buscando por:', termo);
+        }
+    
+        inicializar() {
+            this.renderizarMusicas();
+            this.renderizarArtistas();
+            this.renderizarPlaylists();
+    
+            this.elementos.btnNovaPlaylist.addEventListener('click', () => this.abrirModalCriarPlaylist());
+            this.elementos.fecharModal.addEventListener('click', () => this.fecharModalCriarPlaylist());
+            this.elementos.cancelarPlaylist.addEventListener('click', () => this.fecharModalCriarPlaylist());
+            this.elementos.salvarPlaylist.addEventListener('click', () => this.criarPlaylist());
+            this.elementos.fecharModalAdicionar.addEventListener('click', () => this.fecharModalAdicionarPlaylist());
+            this.elementos.cancelarAdicionar.addEventListener('click', () => this.fecharModalAdicionarPlaylist());
+            this.elementos.campoBusca.addEventListener('input', (e) => this.buscarMusicas(e.target.value));
+    
+            this.elementos.btnPlay.addEventListener('click', () => {
+                if (this.estado.isPlaying) {
+                    this.pausarMusica();
+                } else if (this.estado.musicaAtual) {
+                    this.tocarMusica(this.estado.musicaAtual.id);
+                }
+            });
+    
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    this.fecharModalCriarPlaylist();
+                    this.fecharModalAdicionarPlaylist();
+                }
+            });
+        }
+    }
+    
+    document.addEventListener('DOMContentLoaded', () => {
+        const musicas = [
+            { id: 1, nome: "We Are The Champions ", artista: "Queen", duracao: "3:10", capa: "../imagens/we are the champions.jpg", src: "url_da_musica_1.mp3" },
+            { id: 2, nome: "Evidências", artista: "Chitãozinho & Xororó", duracao: "4:41", capa: "../imagens/evidencias.jpg", src: "url_da_musica_2.mp3" },
+             { id: 3, nome: "I Ran", artista: "A Flock Of Seagulls", duracao: "3:58", capa: "../imagens/i ran.jpg",src: "url_da_musica_3.mp3" },
+            { id: 4, nome: "Like a Rolling Stone", artista: "Bob Dylan", duracao: "6:13", capa: "https://i.scdn.co/image/ab67616d00001e02e8b907dcfb5e2c51785e7b03", src: "url_da_musica_4.mp3" },
+            { id: 5, nome: "Tem Culpa Eu?", artista: "MC LUUKY", duracao: "2:59", capa: "https://image-cdn-ak.spotifycdn.com/image/ab67706c0000da84cd3de32aecb5968cdfbe9e98", src: "url_da_musica_5.mp3" },
+            { id: 6, nome: "Além do Horizonte", artista: " Roberto Carlos", duracao: "4:36", capa: "https://i.ytimg.com/vi/XjjOz-QBQNM/maxresdefault.jpg", src: "url_da_musica_6.mp3" },
+            { id: 7, nome: "Yesterday", artista: "The Beatles", duracao: "2:05", capa: "https://i.scdn.co/image/ab67616d00001e02a4fce8b8352c7c0d19a10948", src: "url_da_musica_7.mp3" },
+            { id: 8, nome: "Sweet Child O'Mine", artista: "Guns N' Roses", duracao: "5:56", capa: "https://i.scdn.co/image/ab67616d00001e02a4fce8b8352c7c0d19a10948", src: "url_da_musica_8.mp3" }
+        ];
+    
+        const artistas = [
+            { id: 1, nome: "Queen", foto: "https://i.scdn.co/image/ab67616100005174a1d2e2a6e481b34bb8e3a7e3" },
+            { id: 2, nome: "The Beatles", foto: "https://i.scdn.co/image/ab67616100005174a1d2e2a6e481b34bb8e3a7e3" },
+            { id: 3, nome: "Michael Jackson", foto: "https://i.scdn.co/image/ab67616100005174a1d2e2a6e481b34bb8e3a7e3" },
+            { id: 4, nome: "Bob Dylan", foto: "https://i.scdn.co/image/ab67616100005174a1d2e2a6e481b34bb8e3a7e3" },
+            { id: 5, nome: "Nirvana", foto: "https://i.scdn.co/image/ab67616100005174a1d2e2a6e481b34bb8e3a7e3" }
+        ];
+    
+        const playlists = [
+            { id: 1, nome: "Favoritas", musicas: [1, 3, 5] },
+            { id: 2, nome: "Rock Clássico", musicas: [1, 4, 5, 8] }
+        ];
+    
+        const player = new MCMusicPlayer(musicas, artistas, playlists);
+        player.inicializar();
+    });
     </script>
-
 </body>
 </html>

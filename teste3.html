@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Busca no Spotify</title>
+  <script src="https://cdn.jsdelivr.net/npm/spotify-web-api-js@1.5.2/src/spotify-web-api.js"></script>
+</head>
+<body>
+
+  <form id="searchForm">
+    <input type="text" id="busca" placeholder="O que você está procurando?" required>
+    <select id="tipo">
+      <option value="album">Álbum</option>
+      <option value="artist">Artista</option>
+      <option value="track">Faixa</option>
+      <option value="playlist">Playlist</option>
+    </select>
+    <button type="submit">PESQUISAR</button>
+  </form>
+
+  <div id="resultados"></div>
+
+  <script>
+    // Inicialize a instância da API
+    const spotifyApi = new SpotifyWebApi();
+
+    // Recupere o token armazenado
+    const token = localStorage.getItem('spotify_token');
+
+    if (token) {
+      spotifyApi.setAccessToken(token);
+    } else {
+      // Redirecione para a autorização se o token não estiver disponível
+      const clientId = '08bf1b17def44b368cd7598a024e2f74'; // Substitua pelo seu Client ID
+      const redirectUri = 'https://dudumilan.github.io/callback.html';
+      const scopes = 'user-read-private user-read-email'; // Escopos necessários
+
+      const authEndpoint = 'https://accounts.spotify.com/authorize';
+      const responseType = 'token';
+
+      const authUrl = `${authEndpoint}?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${encodeURIComponent(scopes)}&response_type=${responseType}`;
+
+      window.location = authUrl;
+    }
+
+    // Manipule o envio do formulário
+    document.getElementById('searchForm').addEventListener('submit', function(event) {
+      event.preventDefault();
+
+      const query = document.getElementById('busca').value;
+      const type = document.getElementById('tipo').value;
+
+      spotifyApi.search(query, [type], { limit: 10 })
+        .then(function(data) {
+          const resultadosDiv = document.getElementById('resultados');
+          resultadosDiv.innerHTML = ''; 
+
+          if (type === 'artist') {
+            const artists = data.artists.items;
+            artists.forEach(function(artist) {
+              const div = document.createElement('div');
+              div.textContent = artist.name;
+              resultadosDiv.appendChild(div);
+            });
+          } else if (type === 'album') {
+            const albums = data.albums.items;
+            albums.forEach(function(album) {
+              const div = document.createElement('div');
+              div.textContent = album.name;
+              resultadosDiv.appendChild(div);
+            });
+          } else if (type === 'track') {
+            const tracks = data.tracks.items;
+            tracks.forEach(function(track) {
+              const div = document.createElement('div');
+              div.textContent = track.name;
+              resultadosDiv.appendChild(div);
+            });
+          } else if (type === 'playlist') {
+            const playlists = data.playlists.items;
+            playlists.forEach(function(playlist) {
+              const div = document.createElement('div');
+              div.textContent = playlist.name;
+              resultadosDiv.appendChild(div);
+            });
+          }
+        })
+        .catch(function(err) {
+          console.error(err);
+        });
+    });
+  </script>
+
+</body>
+</html>

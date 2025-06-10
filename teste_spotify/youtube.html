@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Buscar Música no YouTube</title>
+</head>
+<body>
+  <h1>Buscar Música no YouTube</h1>
+  <input type="text" id="pesquisa" placeholder="Digite o nome da música">
+  <button onclick="buscarNoYouTube()">Buscar</button>
+
+  <div id="resultado"></div>
+
+  <script>
+    const apiKey = "AIzaSyCDWQfJQup_8erN6ikGxex8XtfNdg_KGFM";
+
+    async function buscarNoYouTube() {
+      const termo = document.getElementById("pesquisa").value;
+      if (!termo) {
+        alert("Digite o nome de uma música!");
+        return;
+      }
+      const pesquisa = `${termo} música oficial`; // ou "lyrics", "official audio"
+
+      const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=1&q=${encodeURIComponent(pesquisa)}&videoCategoryId=10&key=${apiKey}`;
+
+      const resposta = await fetch(url);
+      const dados = await resposta.json();
+
+      if (dados.items.length === 0) {
+        document.getElementById("resultado").innerHTML = "Nenhum vídeo encontrado.";
+        return;
+      }
+
+      const video = dados.items[0];
+      const videoId = dados.items[0].id.videoId;
+      const titulo = dados.items[0].snippet.title;
+
+      document.getElementById("resultado").innerHTML = `
+        <h2>${titulo}</h2>
+        <iframe width="560" height="315"
+          src="https://www.youtube.com/embed/${videoId}"
+          frameborder="0"
+          allowfullscreen>
+        </iframe>
+      `;
+    }
+  </script>
+</body>
+</html>

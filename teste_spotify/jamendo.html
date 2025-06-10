@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Busca de Músicas (Jamendo)</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    .musica { margin-bottom: 20px; border-bottom: 1px solid #ccc; padding-bottom: 10px; }
+    img { max-width: 100px; display: block; }
+  </style>
+</head>
+<body>
+  <h1>Buscar Músicas - Jamendo</h1>
+  <input type="text" id="pesquisa" placeholder="Digite o nome da música...">
+  <button onclick="buscarMusica()">Buscar</button>
+
+  <div id="resultado"></div>
+
+  <script src="app_jamendo.js"></script>
+</body>
+</html>

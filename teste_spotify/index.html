@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Buscar Músicas no Spotify</title>
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    input { width: 300px; padding: 10px; }
+    button { padding: 10px 20px; }
+    #resultado { margin-top: 20px; }
+    .musica { margin-bottom: 10px; }
+
+  .musica {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    border-bottom: 1px solid #ccc;
+    padding: 10px 0;
+  }
+
+  .musica img {
+    width: 100px;
+    border-radius: 8px;
+  }
+
+  .musica-info {
+    flex: 1;
+  }
+
+  .musica audio, .musica a {
+    margin-top: 8px;
+    display: block;
+  }
+
+
+  </style>
+</head>
+<body>
+  <h1>Pesquisar Músicas no Spotify</h1>
+  <input type="text" id="pesquisa" placeholder="Digite o nome da música" />
+  <button onclick="buscarMusica()">Buscar</button>
+  <div id="resultado"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Buscar Músicas no YouTube</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    .video {
+      margin-bottom: 30px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Buscar Músicas no YouTube</h1>
+  <input type="text" id="pesquisa" placeholder="Digite o nome da música">
+  <button onclick="buscarNoYouTube()">Buscar</button>
+
+  <div id="resultado"></div>
+
+  <script>
+    const apiKey = "AIzaSyCDWQfJQup_8erN6ikGxex8XtfNdg_KGFM"; // 🔁 Substitua pela sua chave da YouTube Data API
+
+    async function buscarNoYouTube() {
+      const termo = document.getElementById("pesquisa").value;
+      if (!termo) {
+        alert("Digite o nome de uma música!");
+        return;
+      }
+
+      const pesquisa = `${termo} lyric video music`; // reforça que queremos música
+      const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=5&q=${encodeURIComponent(pesquisa)}&videoCategoryId=10&key=${apiKey}`;
+
+      try {
+        const resposta = await fetch(url);
+        const dados = await resposta.json();
+
+        const container = document.getElementById("resultado");
+        container.innerHTML = "";
+
+        if (dados.items.length === 0) {
+          container.innerHTML = "<p>Nenhuma música encontrada.</p>";
+          return;
+        }
+
+        dados.items.forEach(video => {
+          const videoId = video.id.videoId;
+          const titulo = video.snippet.title;
+
+          const html = `
+            <div class="video">
+              <h3>${titulo}</h3>
+              <iframe width="560" height="315"
+                src="https://www.youtube.com/embed/${videoId}"
+                frameborder="0"
+                allowfullscreen>
+              </iframe>
+            </div>
+          `;
+
+          container.innerHTML += html;
+        });
+
+      } catch (erro) {
+        console.error("Erro ao buscar no YouTube:", erro);
+        document.getElementById("resultado").innerHTML = "<p>Erro ao buscar vídeos.</p>";
+      }
+    }
+  </script>
+</body>
+</html>

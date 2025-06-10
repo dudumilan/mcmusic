@@ -1,0 +1,14 @@
+
+CLIENT_ID = e0c58cb0a78a4d9d81803336973f875d
+
+CLIENT_SECRET = db789ffbde31476ea036133b82f96e63
+
+e0c58cb0a78a4d9d81803336973f875d:db789ffbde31476ea036133b82f96e63
+https://www.base64encode.org/
+
+RODAR NO CMD (PROMPT)
+curl -X POST "https://accounts.spotify.com/api/token" -H "Authorization: Basic ZTBjNThjYjBhNzhhNGQ5ZDgxODAzMzM2OTczZjg3NWQ6ZGI3ODlmZmJkZTMxNDc2ZWEwMzYxMzNiODJmOTZlNjM=" -d grant_type=client_credentials
+
+
+
+{"access_token":"BQAfJcgj-s7JTF3b3_Wsnx8zCDhi7wns5g5yChPQ0nYNzwf5oa40ORPyrndtsnM3lFQeEPXBrMwL_F-umDunBzHxkCoRWsxdeBJ5FsOAPN9m1R7xAO-_AXOXFtkxRsPx7MONPpe7dh8","token_type":"Bearer","expires_in":3600}
