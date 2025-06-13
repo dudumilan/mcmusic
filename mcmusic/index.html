@@ -7,38 +7,169 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
 <style>
-body { font-family: 'Montserrat', sans-serif; background-color: #000; color: #f0efef; }
-.sidebar { background-color: #000; }
-.main-content { background: linear-gradient(180deg, #8000ff 0%, #0c0c0c 100%); }
-.card-musica:hover { transform: scale(1.05); transition: all 0.3s ease; }
-.player { background-color: #181818; border-top: 1px solid #282828; }
-.progresso-musica { -webkit-appearance: none; height: 4px; background: #4d4d4d; border-radius: 2px; }
-.progresso-musica::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; background: #fff; border-radius: 50%; cursor: pointer; }
-.btn-verde { background-color: #072668; }
-.btn-verde:hover { background-color: #ae00ff; }
-.texto-principal { color: #fff; }
-.texto-secundario { color: #b3b3b3; }
-.playlist-card { background: linear-gradient(149.46deg, #4000ff, #8e8ee5 99.16%); }
-.sidebar li.active, .sidebar li:hover { color: #fff; font-weight: bold; }
-.sidebar li { cursor: pointer; }
+body {
+    font-family: 'Montserrat', sans-serif;
+    background-color: #000;
+    color: #f0efef;
+}
+.sidebar {
+    background-color: #000;
+}
+.main-content {
+    background: linear-gradient(180deg, #8000ff 0%, #0c0c0c 100%);
+}
+.card-musica {
+    background: #232323;
+    border-radius: 1rem;
+    transition: transform 0.3s, box-shadow 0.3s;
+    cursor: pointer;
+    box-shadow: 0 2px 12px 0 rgba(0,0,0,0.05);
+}
+.card-musica:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 24px 0 rgba(128,0,255,0.2);
+}
+.player {
+    background-color: #181818;
+    border-top: 1px solid #282828;
+}
+.progresso-musica {
+    -webkit-appearance: none;
+    height: 4px;
+    background: #4d4d4d;
+    border-radius: 2px;
+    outline: none;
+    width: 100%;
+}
+.progresso-musica::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 12px;
+    height: 12px;
+    background: #fff;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid #ae00ff;
+}
+.progresso-musica::-moz-range-thumb {
+    width: 12px;
+    height: 12px;
+    background: #fff;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid #ae00ff;
+}
+.progresso-musica::-ms-thumb {
+    width: 12px;
+    height: 12px;
+    background: #fff;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid #ae00ff;
+}
+.progresso-musica:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px #ae00ff80;
+}
+input[type="range"].w-24 {
+    background: #4d4d4d;
+    border-radius: 2px;
+    outline: none;
+    height: 4px;
+}
+input[type="range"].w-24::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 12px;
+    height: 12px;
+    background: #fff;
+    border-radius: 50%;
+    border: 2px solid #072668;
+    cursor: pointer;
+}
+input[type="range"].w-24:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px #07266880;
+}
+.btn-verde {
+    background-color: #072668;
+    color: #fff;
+}
+.btn-verde:hover {
+    background-color: #ae00ff;
+}
+.texto-principal {
+    color: #fff;
+}
+.texto-secundario {
+    color: #b3b3b3;
+}
+.playlist-card {
+    background: linear-gradient(149.46deg, #4000ff 0%, #8e8ee5 99.16%);
+    border-radius: 1rem;
+}
+.sidebar li.active,
+.sidebar li:hover {
+    color: #fff;
+    font-weight: bold;
+}
+.sidebar li {
+    cursor: pointer;
+    transition: color 0.2s, font-weight 0.2s;
+}
+::-webkit-scrollbar {
+    width: 8px;
+    background: #181818;
+}
+::-webkit-scrollbar-thumb {
+    background: #3a3a3a;
+    border-radius: 4px;
+}
+#campo-busca {
+    transition: box-shadow 0.2s;
+}
+#campo-busca:focus {
+    box-shadow: 0 0 0 2px #ae00ff80;
+    background: #222;
+}
+#btn-play svg, #btn-prev svg, #btn-next svg {
+    transition: fill 0.2s;
+}
+#btn-play:hover svg, #btn-prev:hover svg, #btn-next:hover svg {
+    fill: #ae00ff;
+}
+#volume-barra::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 12px;
+    height: 12px;
+    background: #fff;
+    border-radius: 50%;
+    border: 2px solid #072668;
+}
+#volume-barra:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px #07266880;
+}
 </style>
 </head>
 <body class="flex flex-col h-screen">
 <div class="flex flex-1 overflow-hidden">
   <div class="sidebar w-64 flex-shrink-0 hidden md:block p-6">
     <div class="mb-10">
-      <h1 class="text-2xl font-bold texto-principal">MCMusic <img src="../imagens/Iluminati.png" class="logol" alt="logol"><img src="../imagens/Iluminati.png" class="logo"></h1>
+      <h1 class="text-2xl font-bold texto-principal">MCMusic <img src="../imagens/Iluminati.png" class="logol" alt="logol" style="
+        width: 50px;
+        margin-left: 140px;
+        margin-top: -40px;"
+        ></h1>
     </div>
     <nav>
       <ul class="space-y-4" id="sidebar-menu">
-        <li data-section="inicio" class="texto-principal font-medium active">
-          <span class="flex items-center space-x-3">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-            </svg>
-            <span>Início</span>
-          </span>
-        </li>
+        <li id="btn-inicio" data-section="inicio" class="texto-principal font-medium active">
+            <span class="flex items-center space-x-3">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+              </svg>
+              <span>Início</span>
+            </span>
+          </li>
         <li data-section="buscar" class="texto-secundario hover:texto-principal">
           <span class="flex items-center space-x-3">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -67,7 +198,15 @@ body { font-family: 'Montserrat', sans-serif; background-color: #000; color: #f0
         <span>Criar playlist</span>
       </button>
     </div>
-  </div>
+    <li data-section="github"></li>
+        <span class="flex items-center space-x-2">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-github" viewBox="0 0 16 16">
+            <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8">
+          </svg>
+          <span>Extra</span>
+        </span>
+
+</div>
   <div class="main-content flex-1 overflow-y-auto p-6" id="main-content">
     <div class="flex justify-between items-center mb-8">
       <div class="relative w-full md:w-1/3">
@@ -145,6 +284,7 @@ body { font-family: 'Montserrat', sans-serif; background-color: #000; color: #f0
   </div>
 </div>
 
+
 <div id="modal-playlist" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden">
   <div class="bg-gray-800 rounded-lg p-6 w-full max-w-md">
     <div class="flex justify-between items-center mb-4">
@@ -179,7 +319,13 @@ body { font-family: 'Montserrat', sans-serif; background-color: #000; color: #f0
     </div>
   </div>
 </div>
-
+<div id="modal-add-music" class="modal-bg fixed inset-0 flex items-center justify-center z-50 hidden">
+    <div class="modal">
+      <h4>Adicionar música à playlist</h4>
+      <div id="modal-playlists-list"></div>
+      <button id="close-add-music-modal" class="w-full mt-3 py-2 rounded btn-verde">Cancelar</button>
+    </div>
+  </div>
 <script>
 class MCMusicPlayer {
   constructor(musicas, artistas, playlists) {
@@ -224,6 +370,7 @@ class MCMusicPlayer {
       volumeBar: document.getElementById('volume-barra'),
       btnVolUp: document.getElementById('btn-vol-up'),
       btnVolDown: document.getElementById('btn-vol-down'),
+      
     };
   }
 
@@ -239,6 +386,7 @@ class MCMusicPlayer {
         <h3 class="texto-principal font-medium truncate">${musica.nome}</h3>
         <p class="texto-secundario text-sm truncate">${musica.artista}</p>
       `;
+      
       musicaElement.onclick = () => this.tocarMusica(musica.id);
       this.elementos.containerMusicas.appendChild(musicaElement);
     });
@@ -296,6 +444,7 @@ class MCMusicPlayer {
       this.elementos.containerArtistas.appendChild(artistaElement);
     });
   }
+  
 
   tocarMusica(id) {
     const musica = this.musicas.find(m => m.id === id);
@@ -398,6 +547,12 @@ class MCMusicPlayer {
     };
   }
 }
+document.getElementById('btn-inicio').onclick = function() {
+    player.renderizarMusicas();
+    player.renderizarArtistas();
+    player.renderizarPlaylists();
+   
+};
 
 const musicas = [
   { id: 1, nome: "We Are The Champions", artista: "Queen", duracao: "3:10", capa: "../imagens/we are the champions.jpg", src: "../musicas/we are the champions.mp3" },
@@ -406,8 +561,8 @@ const musicas = [
   { id: 4, nome: "Não Quero Dinheiro", artista: "Tim Maia", duracao: "2:34", capa: "../imagens/tim maia.jpg", src: "../musicas/nao quero dinheiro.mp3" },
 ];
 const artistas = [
-  { id: 1, nome: "Queen", foto: "https://i.scdn.co/image/ab67616100005174a1d2e2a6e481b34bb8e3a7e3" },
-  { id: 2, nome: "The Beatles", foto: "https://i.scdn.co/image/ab67616100005174a1d2e2a6e481b34bb8e3a7e3" }
+  { id: 1, nome: "Queen", foto: "../imagens/queen.png" },
+  { id: 2, nome: "The Beatles", foto: "../imagens/beatles.png" }
 ];
 const playlists = [
   { id: 1, nome: "Favoritas", musicas: [1, 3] },
