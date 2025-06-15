@@ -231,7 +231,52 @@
     @keyframes fadeout {
       to { opacity: 0; visibility: hidden; }
     }
+    .like-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: rgba(0,0,0,0.15);
+      border-radius: 50%;
+      padding: 7px;
+      cursor: pointer;
+      z-index: 5;
+      transition: background 0.2s;
+      border: none;
+      outline: none;
+    }
+    .like-btn:hover {
+      background: #8000ff33;
+    }
+    .like-btn.liked svg {
+      fill: #ff3c7e !important;
+      stroke: #ff3c7e !important;
+    }
+    .like-btn svg {
+      width: 24px;
+      height: 24px;
+      fill: none;
+      stroke: #fff;
+      stroke-width: 1.7;
+      transition: fill 0.2s, stroke 0.2s;
+      pointer-events: none;
+    }
   </style>
+    </head>
+    <body class="flex flex-col h-screen">
+    <div id="intro" style="
+      position:fixed;
+      inset:0;
+      background:#000;
+      z-index:99999;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      flex-direction:column;
+      transition: opacity 1s;
+    ">
+      <img src="../imagens/Iluminati.png" alt="Logo" style="width:160px; max-width:60vw; filter:drop-shadow(0 0 16px #8000ff)">
+      <h1 style="color:#fff; font-family:Montserrat,sans-serif; font-size:2.8rem; font-weight:700; margin-top:1.5rem; letter-spacing:2px; text-shadow:0 0 24px #8000ff88">MCMusic</h1>
+    </div>
 </head>
 <body class="flex flex-col h-screen">
 <div id="intro" style="
@@ -437,10 +482,13 @@ class MCMusicPlayer {
     this.musicas = musicas;
     this.artistas = artistas;
     this.playlists = playlists;
+    this.likes = JSON.parse(localStorage.getItem('mc_likes') || "[]");
+    // Garante playlist Curtidas sempre no início
+    this.ensureCurtidasPlaylist();
     this.estado = {
       musicaAtual: null,
-      playlists: playlists,
-      playlistsSidebar: [...playlists],
+      playlists: this.playlists,
+      playlistsSidebar: [...this.playlists],
       playlistsModal: [],
       musicaParaAdicionar: null,
       isPlaying: false,
@@ -489,6 +537,35 @@ class MCMusicPlayer {
     };
   }
 
+  ensureCurtidasPlaylist() {
+    // Garante que existe playlist "Curtidas" no início
+    let curtidas = this.playlists.find(p => p.nome === "Curtidas");
+    if (!curtidas) {
+      this.playlists.unshift({ id: 0, nome: "Curtidas", musicas: this.likes });
+    } else {
+      curtidas.musicas = this.likes;
+    }
+  }
+
+  isLiked(id) {
+    return this.likes.includes(id);
+  }
+
+  toggleLike(id) {
+    if (this.isLiked(id)) {
+      this.likes = this.likes.filter(m => m !== id);
+    } else {
+      this.likes.push(id);
+    }
+    // Atualiza playlist Curtidas
+    let curtidas = this.playlists.find(p => p.nome === "Curtidas");
+    if (curtidas) curtidas.musicas = [...this.likes];
+    localStorage.setItem('mc_likes', JSON.stringify(this.likes));
+    // Atualiza UI
+    this.renderizarMusicas(this.estado.musicasExibidas.length ? this.estado.musicasExibidas : this.musicas);
+    this.renderizarPlaylists();
+  }
+
   renderizarMusicas(musicasMostradas = this.musicas) {
     this.elementos.containerMusicas.style.display = '';
     this.elementos.containerMusicas.style.gridTemplateColumns = '';
@@ -496,14 +573,22 @@ class MCMusicPlayer {
     this.elementos.containerMusicas.innerHTML = '';
     musicasMostradas.forEach(musica => {
       const musicaElement = document.createElement('div');
-      musicaElement.className = 'card-musica bg-gray-800 p-4 rounded-lg cursor-pointer hover:bg-gray-700 transition-colors';
+      musicaElement.className = 'card-musica bg-gray-800 p-4 rounded-lg cursor-pointer hover:bg-gray-700 transition-colors relative';
       musicaElement.innerHTML = `
+        <button class="like-btn${this.isLiked(musica.id) ? ' liked' : ''}" title="Curtir/descurtir">
+          <svg viewBox="0 0 24 24"><path d="M12 21s-7-5.2-7-10.1c0-2.6 2.1-4.9 4.7-4.9 1.6 0 3.3 1.2 3.3 1.2s1.7-1.2 3.3-1.2c2.6 0 4.7 2.3 4.7 4.9C19 15.8 12 21 12 21z"/></svg>
+        </button>
         <div class="relative mb-4">
           <img src="${musica.capa}" alt="${musica.nome}" class="w-full aspect-square object-cover rounded">
         </div>
         <h3 class="texto-principal font-medium truncate">${musica.nome}</h3>
         <p class="texto-secundario text-sm truncate">${musica.artista}</p>
       `;
+      // Like button
+      musicaElement.querySelector('.like-btn').onclick = (e) => {
+        e.stopPropagation();
+        this.toggleLike(musica.id);
+      };
       musicaElement.onclick = () => this.tocarMusica(musica.id);
       this.elementos.containerMusicas.appendChild(musicaElement);
     });
@@ -520,18 +605,26 @@ class MCMusicPlayer {
     c.style.gap = '24px';
     this.musicas.forEach(musica => {
       const musicaElement = document.createElement('div');
-      musicaElement.className = 'card-musica bg-gray-800 p-4 rounded-lg cursor-pointer hover:bg-gray-700 transition-colors flex flex-col items-center';
+      musicaElement.className = 'card-musica bg-gray-800 p-4 rounded-lg cursor-pointer hover:bg-gray-700 transition-colors flex flex-col items-center relative';
       musicaElement.innerHTML = `
+        <button class="like-btn${this.isLiked(musica.id) ? ' liked' : ''}" title="Curtir/descurtir">
+          <svg viewBox="0 0 24 24"><path d="M12 21s-7-5.2-7-10.1c0-2.6 2.1-4.9 4.7-4.9 1.6 0 3.3 1.2 3.3 1.2s1.7-1.2 3.3-1.2c2.6 0 4.7 2.3 4.7 4.9C19 15.8 12 21 12 21z"/></svg>
+        </button>
         <img src="${musica.capa}" alt="${musica.nome}" class="w-full aspect-square object-cover rounded mb-2">
         <h3 class="texto-principal font-medium truncate text-center">${musica.nome}</h3>
         <p class="texto-secundario text-sm truncate text-center">${musica.artista}</p>
       `;
+      musicaElement.querySelector('.like-btn').onclick = (e) => {
+        e.stopPropagation();
+        this.toggleLike(musica.id);
+      };
       musicaElement.onclick = () => this.tocarMusica(musica.id);
       c.appendChild(musicaElement);
     });
   }
 
   renderizarPlaylists() {
+    this.ensureCurtidasPlaylist();
     this.elementos.containerPlaylists.innerHTML = '';
     this.estado.playlists.forEach(playlist => {
       const playlistElement = document.createElement('div');
@@ -539,14 +632,17 @@ class MCMusicPlayer {
       playlistElement.innerHTML = `
         <div class="mb-3">
           <div class="w-full aspect-square bg-black bg-opacity-20 rounded flex items-center justify-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
-            </svg>
+            ${playlist.nome === "Curtidas"
+              ? `<svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-pink-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 21s-7-5.2-7-10.1c0-2.6 2.1-4.9 4.7-4.9 1.6 0 3.3 1.2 3.3 1.2s1.7-1.2 3.3-1.2c2.6 0 4.7 2.3 4.7 4.9C19 15.8 12 21 12 21z"/></svg>`
+              : `<svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+                </svg>`
+            }
           </div>
         </div>
         <h3 class="texto-principal font-medium truncate">${playlist.nome}</h3>
         <p class="texto-secundario text-sm">${playlist.musicas.length} músicas</p>
-        <button class="absolute top-2 right-2 px-2 py-1 rounded bg-[#8000ff] text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity" data-id="${playlist.id}" style="z-index:2">Gerenciar</button>
+        ${playlist.nome !== "Curtidas" ? `<button class="absolute top-2 right-2 px-2 py-1 rounded bg-[#8000ff] text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity" data-id="${playlist.id}" style="z-index:2">Gerenciar</button>` : ""}
       `;
       playlistElement.onclick = (e) => {
         if (e.target.tagName === 'BUTTON') {
@@ -600,7 +696,7 @@ class MCMusicPlayer {
         <h3 class="texto-principal font-medium">${artista.nome}</h3>
         <p class="texto-secundario text-sm">Artista</p>
       `;
-      // Ao clicar no artista, filtra as músicas daquele artista
+      
       artistaElement.onclick = () => {
         const musicasDoArtista = this.musicas.filter(m => m.artista === artista.nome);
         this.renderizarMusicas(musicasDoArtista);
@@ -857,7 +953,8 @@ const musicas = [
 ];
 const artistas = [
   { id: 1, nome: "Queen", foto: "../imagens/queen.png" },
-  { id: 2, nome: "Chitãozinho & Xororó ", foto: "../imagens/chitao.jpg" }
+  { id: 2, nome: "Chitãozinho & Xororó", foto: "../imagens/chitao.jpg" },
+  { id: 3, nome: "Tim Maia", foto: "../imagens/Tim mai.jpg" }
 ];
 const playlists = [
   { id: 1, nome: "Favoritas", musicas: [1, 3] },
