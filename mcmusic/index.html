@@ -483,7 +483,6 @@ class MCMusicPlayer {
     this.artistas = artistas;
     this.playlists = playlists;
     this.likes = JSON.parse(localStorage.getItem('mc_likes') || "[]");
-    // Garante playlist Curtidas sempre no início
     this.ensureCurtidasPlaylist();
     this.estado = {
       musicaAtual: null,
