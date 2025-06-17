@@ -260,6 +260,21 @@
       transition: fill 0.2s, stroke 0.2s;
       pointer-events: none;
     }
+    #resultados-busca {
+      display: none;
+      position: absolute;
+      top: 110%;
+      left: 0;
+      width: 100%;
+      background: #181818;
+      border-radius: 0.5rem;
+      z-index: 1000;
+      box-shadow: 0 4px 16px #0008;
+      padding: 0.5rem 0;
+      max-height: 280px;
+      overflow-y: auto;
+      border: 1px solid #333;
+    }
   </style>
     </head>
     <body class="flex flex-col h-screen">
@@ -355,6 +370,7 @@
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 absolute right-3 top-2.5 texto-secundario" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
         </svg>
+        <div id="resultados-busca"></div>
       </div>
       <div class="hidden md:flex items-center space-x-4">
         <span class="texto-principal font-medium">Meu Perfil</span>
@@ -533,11 +549,59 @@ class MCMusicPlayer {
       adicionarMusica: document.getElementById('adicionar-musica'),
       fecharModalGerenciar: document.getElementById('fechar-modal-gerenciar'),
       excluirPlaylist: document.getElementById('excluir-playlist'),
+      resultadosBusca: document.getElementById('resultados-busca')
     };
+    this.setupBusca();
+  }
+
+  setupBusca() {
+    const resultados = document.getElementById('resultados-busca');
+    this.elementos.campoBusca.addEventListener('input', (e) => {
+      const termo = e.target.value.trim().toLowerCase();
+      if (termo === "") {
+        resultados.style.display = "none";
+        this.renderizarMusicas(this.musicas);
+        return;
+      }
+      const normaliza = s => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+      const filtradas = this.musicas.filter(m =>
+        normaliza(m.nome).includes(normaliza(termo)) ||
+        normaliza(m.artista).includes(normaliza(termo))
+      );
+      if (filtradas.length > 0) {
+        resultados.innerHTML = filtradas.map(m => `
+          <div class="hover:bg-[#8000ff22] cursor-pointer px-4 py-2 flex items-center gap-3" data-id="${m.id}">
+            <img src="${m.capa}" style="width:40px;height:40px;object-fit:cover;border-radius:8px;">
+            <div>
+              <div style="color:#fff;font-weight:500">${m.nome}</div>
+              <div style="color:#b3b3b3;font-size:0.9em">${m.artista}</div>
+            </div>
+          </div>
+        `).join('');
+        resultados.style.display = "block";
+        resultados.querySelectorAll('div[data-id]').forEach(div => {
+          div.onclick = () => {
+            const musica = this.musicas.find(m => m.id == div.getAttribute('data-id'));
+            this.elementos.campoBusca.value = musica.nome;
+            resultados.style.display = "none";
+            this.renderizarMusicas([musica]);
+            this.tocarMusica(musica.id);
+          };
+        });
+      } else {
+        resultados.innerHTML = `<div style="color:#b3b3b3;padding:0.75rem 1rem;">Nenhuma música encontrada</div>`;
+        resultados.style.display = "block";
+      }
+      this.renderizarMusicas(filtradas);
+    });
+    document.addEventListener('click', (ev) => {
+      if (!this.elementos.campoBusca.contains(ev.target) && !resultados.contains(ev.target)) {
+        resultados.style.display = "none";
+      }
+    });
   }
 
   ensureCurtidasPlaylist() {
-    // Garante que existe playlist "Curtidas" no início
     let curtidas = this.playlists.find(p => p.nome === "Curtidas");
     if (!curtidas) {
       this.playlists.unshift({ id: 0, nome: "Curtidas", musicas: this.likes });
@@ -545,30 +609,17 @@ class MCMusicPlayer {
       curtidas.musicas = this.likes;
     }
   }
-
-  isLiked(id) {
-    return this.likes.includes(id);
-  }
-
+  isLiked(id) { return this.likes.includes(id); }
   toggleLike(id) {
-    if (this.isLiked(id)) {
-      this.likes = this.likes.filter(m => m !== id);
-    } else {
-      this.likes.push(id);
-    }
-    // Atualiza playlist Curtidas
+    if (this.isLiked(id)) this.likes = this.likes.filter(m => m !== id);
+    else this.likes.push(id);
     let curtidas = this.playlists.find(p => p.nome === "Curtidas");
     if (curtidas) curtidas.musicas = [...this.likes];
     localStorage.setItem('mc_likes', JSON.stringify(this.likes));
-    // Atualiza UI
     this.renderizarMusicas(this.estado.musicasExibidas.length ? this.estado.musicasExibidas : this.musicas);
     this.renderizarPlaylists();
   }
-
   renderizarMusicas(musicasMostradas = this.musicas) {
-    this.elementos.containerMusicas.style.display = '';
-    this.elementos.containerMusicas.style.gridTemplateColumns = '';
-    this.elementos.containerMusicas.style.gap = '';
     this.elementos.containerMusicas.innerHTML = '';
     musicasMostradas.forEach(musica => {
       const musicaElement = document.createElement('div');
@@ -583,7 +634,6 @@ class MCMusicPlayer {
         <h3 class="texto-principal font-medium truncate">${musica.nome}</h3>
         <p class="texto-secundario text-sm truncate">${musica.artista}</p>
       `;
-      // Like button
       musicaElement.querySelector('.like-btn').onclick = (e) => {
         e.stopPropagation();
         this.toggleLike(musica.id);
@@ -593,35 +643,6 @@ class MCMusicPlayer {
     });
     this.estado.musicasExibidas = musicasMostradas.slice();
   }
-
-  exibirPrateleira() {
-    if (this.elementos.containerPlaylists) this.elementos.containerPlaylists.innerHTML = '';
-    if (this.elementos.containerArtistas) this.elementos.containerArtistas.innerHTML = '';
-    const c = this.elementos.containerMusicas;
-    c.innerHTML = '';
-    c.style.display = 'grid';
-    c.style.gridTemplateColumns = 'repeat(auto-fit, minmax(180px, 1fr))';
-    c.style.gap = '24px';
-    this.musicas.forEach(musica => {
-      const musicaElement = document.createElement('div');
-      musicaElement.className = 'card-musica bg-gray-800 p-4 rounded-lg cursor-pointer hover:bg-gray-700 transition-colors flex flex-col items-center relative';
-      musicaElement.innerHTML = `
-        <button class="like-btn${this.isLiked(musica.id) ? ' liked' : ''}" title="Curtir/descurtir">
-          <svg viewBox="0 0 24 24"><path d="M12 21s-7-5.2-7-10.1c0-2.6 2.1-4.9 4.7-4.9 1.6 0 3.3 1.2 3.3 1.2s1.7-1.2 3.3-1.2c2.6 0 4.7 2.3 4.7 4.9C19 15.8 12 21 12 21z"/></svg>
-        </button>
-        <img src="${musica.capa}" alt="${musica.nome}" class="w-full aspect-square object-cover rounded mb-2">
-        <h3 class="texto-principal font-medium truncate text-center">${musica.nome}</h3>
-        <p class="texto-secundario text-sm truncate text-center">${musica.artista}</p>
-      `;
-      musicaElement.querySelector('.like-btn').onclick = (e) => {
-        e.stopPropagation();
-        this.toggleLike(musica.id);
-      };
-      musicaElement.onclick = () => this.tocarMusica(musica.id);
-      c.appendChild(musicaElement);
-    });
-  }
-
   renderizarPlaylists() {
     this.ensureCurtidasPlaylist();
     this.elementos.containerPlaylists.innerHTML = '';
@@ -663,14 +684,6 @@ class MCMusicPlayer {
       this.elementos.listaPlaylists.appendChild(playlistElement);
     });
   }
-
-  filtrarPorPlaylist(playlistId) {
-    const playlist = this.estado.playlists.find(p => p.id === playlistId);
-    if (!playlist) return;
-    const musicasFiltradas = this.musicas.filter(m => playlist.musicas.includes(m.id));
-    this.renderizarMusicas(musicasFiltradas);
-  }
-
   renderizarArtistas() {
     this.elementos.containerArtistas.innerHTML = '';
     const verTodos = document.createElement('div');
@@ -695,7 +708,6 @@ class MCMusicPlayer {
         <h3 class="texto-principal font-medium">${artista.nome}</h3>
         <p class="texto-secundario text-sm">Artista</p>
       `;
-      
       artistaElement.onclick = () => {
         const musicasDoArtista = this.musicas.filter(m => m.artista === artista.nome);
         this.renderizarMusicas(musicasDoArtista);
@@ -703,7 +715,6 @@ class MCMusicPlayer {
       this.elementos.containerArtistas.appendChild(artistaElement);
     });
   }
-  
   tocarMusica(id) {
     const musica = this.musicas.find(m => m.id === id);
     if (!musica) return;
@@ -722,13 +733,11 @@ class MCMusicPlayer {
       this.estado.musicasExibidas = this.musicas.slice();
     }
   }
-
   pausarMusica() {
     this.estado.isPlaying = false;
     this.estado.audioElement.pause();
     this.atualizarBtnPlay(false);
   }
-
   atualizarBtnPlay(isPlaying) {
     if (isPlaying) {
       this.elementos.btnPlay.innerHTML = `
@@ -742,13 +751,11 @@ class MCMusicPlayer {
       </svg>`;
     }
   }
-
   formatarTempo(tempo) {
     const minutos = Math.floor(tempo / 60);
     const segundos = Math.floor(tempo % 60);
     return `${minutos < 10 ? '0' : ''}${minutos}:${segundos < 10 ? '0' : ''}${segundos}`;
   }
-
   atualizarProgresso() {
     const audioElement = this.estado.audioElement;
     clearInterval(this.estado.intervaloProgresso);
@@ -764,7 +771,6 @@ class MCMusicPlayer {
       }
     }, 500);
   }
-
   tocarProxima() {
     const lista = this.estado.musicasExibidas && this.estado.musicasExibidas.length > 0 ? this.estado.musicasExibidas : this.musicas;
     const atual = lista.findIndex(m => m.id === this.estado.musicaAtual?.id);
@@ -772,7 +778,6 @@ class MCMusicPlayer {
       this.tocarMusica(lista[atual + 1].id);
     }
   }
-
   tocarAnterior() {
     const lista = this.estado.musicasExibidas && this.estado.musicasExibidas.length > 0 ? this.estado.musicasExibidas : this.musicas;
     const atual = lista.findIndex(m => m.id === this.estado.musicaAtual?.id);
@@ -780,7 +785,6 @@ class MCMusicPlayer {
       this.tocarMusica(lista[atual - 1].id);
     }
   }
-
   abrirModalGerenciarPlaylist(playlistId) {
     this.estado.playlistGerenciada = playlistId;
     const playlist = this.estado.playlists.find(p => p.id === playlistId);
@@ -789,7 +793,6 @@ class MCMusicPlayer {
     this.renderizarSelectMusica(playlist);
     this.elementos.modalGerenciarPlaylist.classList.remove('hidden');
   }
-
   renderizarListaMusicasGerenciar(playlist) {
     const lista = document.createElement('ul');
     lista.className = "mb-2";
@@ -806,7 +809,6 @@ class MCMusicPlayer {
     });
     this.elementos.listaMusicasGerenciar.innerHTML = '';
     this.elementos.listaMusicasGerenciar.appendChild(lista);
-
     lista.querySelectorAll('.remover-musica').forEach(btn => {
       btn.onclick = (e) => {
         const idMusica = parseInt(btn.getAttribute('data-id'));
@@ -814,7 +816,6 @@ class MCMusicPlayer {
       };
     });
   }
-
   renderizarSelectMusica(playlist) {
     const select = this.elementos.selectMusica;
     select.innerHTML = '';
@@ -827,7 +828,6 @@ class MCMusicPlayer {
       }
     });
   }
-
   adicionarMusicaNaPlaylist(playlistId, musicaId) {
     const playlist = this.estado.playlists.find(p => p.id === playlistId);
     musicaId = parseInt(musicaId);
@@ -838,7 +838,6 @@ class MCMusicPlayer {
       this.renderizarPlaylists();
     }
   }
-
   removerMusicaDaPlaylist(playlistId, musicaId) {
     const playlist = this.estado.playlists.find(p => p.id === playlistId);
     if (playlist) {
@@ -848,19 +847,16 @@ class MCMusicPlayer {
       this.renderizarPlaylists();
     }
   }
-
   excluirPlaylist(playlistId) {
     this.estado.playlists = this.estado.playlists.filter(p => p.id !== playlistId);
     this.estado.playlistsSidebar = this.estado.playlistsSidebar.filter(p => p.id !== playlistId);
     this.renderizarPlaylists();
     this.elementos.modalGerenciarPlaylist.classList.add('hidden');
   }
-
   inicializar() {
     this.renderizarMusicas();
     this.renderizarArtistas();
     this.renderizarPlaylists();
-
     this.elementos.btnNovaPlaylist.onclick = () => this.elementos.modalPlaylist.classList.remove('hidden');
     this.elementos.fecharModal.onclick = this.elementos.cancelarPlaylist.onclick = () => this.elementos.modalPlaylist.classList.add('hidden');
     this.elementos.salvarPlaylist.onclick = (e) => {
@@ -874,25 +870,21 @@ class MCMusicPlayer {
       this.elementos.modalPlaylist.classList.add('hidden');
       this.elementos.nomePlaylist.value = '';
     };
-
     this.elementos.adicionarMusica.onclick = () => {
       const playlistId = this.estado.playlistGerenciada;
       const musicaId = this.elementos.selectMusica.value;
       if (musicaId) this.adicionarMusicaNaPlaylist(playlistId, musicaId);
     };
-
     this.elementos.fecharModalGerenciar.onclick = () => {
       this.elementos.modalGerenciarPlaylist.classList.add('hidden');
       this.estado.playlistGerenciada = null;
     };
-
     this.elementos.excluirPlaylist.onclick = () => {
       if (confirm('Deseja realmente excluir esta playlist?')) {
         this.excluirPlaylist(this.estado.playlistGerenciada);
         this.estado.playlistGerenciada = null;
       }
     };
-
     this.elementos.volumeBar.addEventListener('input', (e) => {
       this.estado.audioElement.volume = e.target.value / 100;
     });
@@ -908,7 +900,6 @@ class MCMusicPlayer {
       this.elementos.volumeBar.value = v;
       this.estado.audioElement.volume = v / 100;
     };
-
     this.elementos.btnPlay.onclick = () => {
       if (this.estado.isPlaying) {
         this.pausarMusica();
@@ -919,7 +910,6 @@ class MCMusicPlayer {
         this.atualizarProgresso();
       }
     };
-
     this.elementos.barraProgresso.addEventListener('input', (e) => {
       if (!this.estado.musicaAtual) return;
       const audio = this.estado.audioElement;
@@ -929,10 +919,8 @@ class MCMusicPlayer {
       audio.currentTime = novoTempo;
       this.elementos.tempoAtual.textContent = this.formatarTempo(novoTempo);
     });
-
     this.elementos.btnNext.onclick = () => this.tocarProxima();
     this.elementos.btnPrev.onclick = () => this.tocarAnterior();
-
     this.elementos.listaPlaylists.onclick = e => {
       const li = e.target.closest('li');
       if (li) {
@@ -941,6 +929,33 @@ class MCMusicPlayer {
         if (pl) this.filtrarPorPlaylist(pl.id);
       }
     };
+  }
+  exibirPrateleira() {
+    this.elementos.containerMusicas.innerHTML = '';
+    this.musicas.forEach(musica => {
+      const musicaElement = document.createElement('div');
+      musicaElement.className = 'card-musica bg-gray-800 p-4 rounded-lg cursor-pointer hover:bg-gray-700 transition-colors flex flex-col items-center relative';
+      musicaElement.innerHTML = `
+        <button class="like-btn${this.isLiked(musica.id) ? ' liked' : ''}" title="Curtir/descurtir">
+          <svg viewBox="0 0 24 24"><path d="M12 21s-7-5.2-7-10.1c0-2.6 2.1-4.9 4.7-4.9 1.6 0 3.3 1.2 3.3 1.2s1.7-1.2 3.3-1.2c2.6 0 4.7 2.3 4.7 4.9C19 15.8 12 21 12 21z"/></svg>
+        </button>
+        <img src="${musica.capa}" alt="${musica.nome}" class="w-full aspect-square object-cover rounded mb-2">
+        <h3 class="texto-principal font-medium truncate text-center">${musica.nome}</h3>
+        <p class="texto-secundario text-sm truncate text-center">${musica.artista}</p>
+      `;
+      musicaElement.querySelector('.like-btn').onclick = (e) => {
+        e.stopPropagation();
+        this.toggleLike(musica.id);
+      };
+      musicaElement.onclick = () => this.tocarMusica(musica.id);
+      this.elementos.containerMusicas.appendChild(musicaElement);
+    });
+  }
+  filtrarPorPlaylist(playlistId) {
+    const playlist = this.estado.playlists.find(p => p.id === playlistId);
+    if (!playlist) return;
+    const musicasFiltradas = this.musicas.filter(m => playlist.musicas.includes(m.id));
+    this.renderizarMusicas(musicasFiltradas);
   }
 }
 const musicas = [
@@ -958,12 +973,10 @@ const musicas = [
   { id: 12, nome: "Take Me Out", artista: "Franz Ferdinand", duracao: "6:00", capa: "../imagens/take.jpg", src: "../musicas/take.mp3"},
   { id: 13, nome: "Washing Machine Heart", artista: "Mitski", duracao: "6:00", capa: "../imagens/heart.jpg", src: "../musicas/heart.mp3"},
   { id: 14, nome: "back to friends", artista: "sombr", duracao: "6:00", capa: "../imagens/back.jpg", src: "../musicas/back.mp3"},
-  { id: 15, nome: "Love Train", artista: "Queen", duracao: "6:00", capa: "../imagens/love.jpg", src: "../musicas/love.mp3"},
+  { id: 15, nome: "Love Train", artista: "The O'Jays", duracao: "6:00", capa: "../imagens/love.jpg", src: "../musicas/love.mp3"},
   { id: 17, nome: "Sopa Nas Candjanga", artista: "", duracao: "3:15", capa: "../imagens/", src: "../musicas/"},
   { id: 18, nome: "Só você", artista: "Fábio Jr", duracao: "3:15", capa: "../imagens/", src: "../musicas/"},
-  
 ];
-
 const artistas = [
   { id: 1, nome: "Queen", foto: "../imagens/queen.png" },
   { id: 2, nome: "Chitãozinho & Xororó", foto: "../imagens/chitao.jpg" },
