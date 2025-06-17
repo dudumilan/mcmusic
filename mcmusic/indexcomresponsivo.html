@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MCMusic</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    html, body { height: 100%; margin: 0; }
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background-color: #000;
+      color: #f0efef;
+      height: 100%;
+      min-height: 100vh;
+    }
+    .sidebar {
+      background-color: #000;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+    .main-content {
+      background: linear-gradient(180deg, #8000ff 0%, #0c0c0c 100%);
+      min-height: 100vh;
+    }
+    .card-musica {
+      background: #232323;
+      border-radius: 1rem;
+      transition: transform 0.3s, box-shadow 0.3s;
+      cursor: pointer;
+      box-shadow: 0 2px 12px 0 rgba(0,0,0,0.05);
+    }
+    .card-musica:hover {
+      transform: scale(1.05);
+      box-shadow: 0 8px 24px 0 rgba(128,0,255,0.2);
+    }
+    .player {
+      background-color: #181818;
+      border-top: 1px solid #282828;
+    }
+    .progresso-musica {
+      -webkit-appearance: none;
+      height: 4px;
+      background: #4d4d4d;
+      border-radius: 2px;
+      outline: none;
+      width: 100%;
+    }
+    .progresso-musica::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 12px;
+      height: 12px;
+      background: #fff;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid #ae00ff;
+    }
+    .progresso-musica::-moz-range-thumb {
+      width: 12px;
+      height: 12px;
+      background: #fff;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid #ae00ff;
+    }
+    .progresso-musica::-ms-thumb {
+      width: 12px;
+      height: 12px;
+      background: #fff;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid #ae00ff;
+    }
+    .progresso-musica:focus {
+      outline: none;
+      box-shadow: 0 0 0 2px #ae00ff80;
+    }
+    input[type="range"].w-24 {
+      background: #4d4d4d;
+      border-radius: 2px;
+      outline: none;
+      height: 4px;
+    }
+    input[type="range"].w-24::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 12px;
+      height: 12px;
+      background: #fff;
+      border-radius: 50%;
+      border: 2px solid #072668;
+      cursor: pointer;
+    }
+    input[type="range"].w-24:focus {
+      outline: none;
+      box-shadow: 0 0 0 2px #07266880;
+    }
+    .btn-verde {
+      background-color: #072668;
+      color: #fff;
+    }
+    .btn-verde:hover {
+      background-color: #ae00ff;
+    }
+    .texto-principal {
+      color: #fff;
+    }
+    .texto-secundario {
+      color: #b3b3b3;
+    }
+    .playlist-card {
+      background: linear-gradient(149.46deg, #4000ff 0%, #8e8ee5 99.16%);
+      border-radius: 1rem;
+    }
+    .sidebar li.active,
+    .sidebar li:hover {
+      color: #fff;
+      font-weight: bold;
+    }
+    .sidebar li {
+      cursor: pointer;
+      transition: color 0.2s, font-weight 0.2s;
+    }
+    ::-webkit-scrollbar {
+      width: 8px;
+      background: #181818;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #3a3a3a;
+      border-radius: 4px;
+    }
+    #campo-busca {
+      transition: box-shadow 0.2s;
+    }
+    #campo-busca:focus {
+      box-shadow: 0 0 0 2px #ae00ff80;
+      background: #222;
+    }
+    #btn-play svg, #btn-prev svg, #btn-next svg {
+      transition: fill 0.2s;
+    }
+    #btn-play:hover svg, #btn-prev:hover svg, #btn-next:hover svg {
+      fill: #ae00ff;
+    }
+    #volume-barra::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 12px;
+      height: 12px;
+      background: #fff;
+      border-radius: 50%;
+      border: 2px solid #072668;
+    }
+    #volume-barra:focus {
+      outline: none;
+      box-shadow: 0 0 0 2px #07266880;
+    }
+    a.github-link {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #fff;
+      text-decoration: none;
+      font-weight: 600;
+      margin-top: 2rem;
+      transition: color 0.2s;
+    }
+    a.github-link:hover {
+      color: #ae00ff;
+    }
+    a.github-link svg {
+      width: 24px; height: 24px;
+      fill: currentColor;
+    }
+    .sidebar-bottom {
+      margin-top: auto;
+    }
+    .github-cards-merged {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1.5rem;
+      gap: 0;
+      border-radius: 1rem;
+      overflow: hidden;
+      background: #232323;
+      box-shadow: 0 8px 24px 0 rgba(128,0,255,0.15);
+      width: fit-content;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .github-merged-avatar {
+      width: 320px;
+      height: 320px;
+      object-fit: cover;
+      display: block;
+      margin: 0;
+      border: none;
+      padding: 0;
+      transition: filter 0.3s, z-index 0.3s;
+    }
+    .github-merged-avatar:hover {
+      z-index: 2;
+      filter: brightness(1.08) drop-shadow(0 0 18px #8000ff88);
+    }
+    @media (max-width: 700px) {
+      .github-cards-merged {
+        flex-direction: column;
+        width: 100%;
+      }
+      .github-merged-avatar {
+        width: 100%;
+        height: auto;
+        border-radius: 0;
+      }
+    }
+    .github-close {
+      display: block;
+      margin: 2rem auto 0 auto;
+      padding: 0.5rem 1.5rem;
+      border-radius: 9999px;
+      background: #8000ff;
+      color: #fff;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: background .2s;
+    }
+    .github-close:hover {
+      background: #ae00ff;
+    }
+    #intro {
+      animation: fadeout 1s 2.3s forwards;
+    }
+    @keyframes fadeout {
+      to { opacity: 0; visibility: hidden; }
+    }
+    .like-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: rgba(0,0,0,0.15);
+      border-radius: 50%;
+      padding: 7px;
+      cursor: pointer;
+      z-index: 5;
+      transition: background 0.2s;
+      border: none;
+      outline: none;
+    }
+    .like-btn:hover {
+      background: #8000ff33;
+    }
+    .like-btn.liked svg {
+      fill: #ff3c7e !important;
+      stroke: #ff3c7e !important;
+    }
+    .like-btn svg {
+      width: 24px;
+      height: 24px;
+      fill: none;
+      stroke: #fff;
+      stroke-width: 1.7;
+      transition: fill 0.2s, stroke 0.2s;
+      pointer-events: none;
+    }
+    #resultados-busca {
+      display: none;
+      position: absolute;
+      top: 110%;
+      left: 0;
+      width: 100%;
+      background: #181818;
+      border-radius: 0.5rem;
+      z-index: 1000;
+      box-shadow: 0 4px 16px #0008;
+      padding: 0.5rem 0;
+      max-height: 280px;
+      overflow-y: auto;
+      border: 1px solid #333;
+    }
+   @media (max-width: 1024px) {
+      .sidebar { display: none !important; }
+      #sidebar-mobile { display: flex !important; }
+      #btn-sidebar-open { display: inline-flex !important; }
+    }
+    @media (min-width: 1025px) {
+      .sidebar { display: flex !important; }
+      #sidebar-mobile { display: none !important; }
+      #btn-sidebar-open { display: none !important; }
+    }
+    #sidebar-mobile {
+      transition: transform 0.3s, opacity 0.25s;
+      transform: translateX(-100%);
+      opacity: 0;
+      z-index: 9999;
+      display: none;
+      height: 100vh;
+    }
+    #sidebar-mobile.open {
+      transform: translateX(0);
+      opacity: 1;
+      display: flex !important;
+    }
+    #sidebar-backdrop {
+      background: rgba(0,0,0,0.6);
+      position: fixed;
+      inset: 0;
+      z-index: 9998;
+      display: none;
+    }
+    #sidebar-backdrop.open { display: block; }
+  </style>
+</head>
+<body class="h-screen">
+<button id="btn-sidebar-open" class="fixed top-3 left-3 z-50 bg-[#8000ff] text-white rounded-full p-3 shadow-lg focus:outline-none" style="display:none">
+  <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+</button>
+<div id="sidebar-backdrop"></div>
+<div id="intro" style="position:fixed; inset:0; background:#000; z-index:99999; display:flex; justify-content:center; align-items:center; flex-direction:column; transition: opacity 1s;">
+  <img src="../imagens/Iluminati.png" alt="Logo" style="width:160px; max-width:60vw; filter:drop-shadow(0 0 16px #8000ff)">
+  <h1 style="color:#fff; font-family:Montserrat,sans-serif; font-size:2.8rem; font-weight:700; margin-top:1.5rem; letter-spacing:2px; text-shadow:0 0 24px #8000ff88">MCMusic</h1>
+</div>
+<div class="flex h-full">
+  <div class="sidebar w-64 flex-shrink-0 flex flex-col p-6">
+<div class="mb-10">
+      <h1 class="text-2xl font-bold texto-principal flex items-center">
+        MCMusic
+        <img src="../imagens/Iluminati.png" class="logol" alt="logol" style="width: 50px; margin-left: 16px; margin-top:-4px;">
+      </h1>
+    </div>
+  <nav>
+    <ul class="space-y-4" id="sidebar-menu-mobile">
+      <li id="btn-inicio-mobile" data-section="inicio" class="texto-principal font-medium active">
+        <span class="flex items-center space-x-3">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+          </svg>
+          <span>Início</span>
+        </span>
+      </li>
+      <li data-section="buscar" class="texto-secundario hover:texto-principal">
+        <span class="flex items-center space-x-3">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <span>Buscar</span>
+        </span>
+      </li>
+      <li id="btn-biblioteca-mobile" data-section="biblioteca" class="texto-secundario hover:texto-principal">
+        <span class="flex items-center space-x-3">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+          </svg>
+          <span>Sua Biblioteca</span>
+        </span>
+      </li>
+    </ul>
+  </nav>
+  <div class="mt-10">
+    <h3 class="texto-secundario uppercase text-xs font-bold mb-4">Playlists</h3>
+    <ul class="space-y-3" id="lista-playlists-mobile"></ul>
+    <button id="btn-nova-playlist-mobile" class="mt-4 flex items-center space-x-2 texto-secundario hover:texto-principal">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+      </svg>
+      <span>Criar playlist</span>
+    </button>
+  </div>
+  <div class="sidebar-bottom flex flex-col items-center mt-10">
+    <button id="btn-github-popup-mobile" class="playlist-card flex items-center justify-center w-full mt-6 py-2 px-3 rounded-lg shadow hover:opacity-90 transition-opacity">
+      <svg viewBox="0 0 16 16" fill="currentColor" class="w-6 h-6 mr-2">
+        <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8"/>
+      </svg>
+      <span class="font-semibold">Meu Github</span>
+    </button>
+  </div>
+</div>
+<div id="sidebar-mobile" class="sidebar fixed top-0 left-0 h-full w-64 bg-black flex-col p-6 z-50" style="display:none">
+    <button id="btn-sidebar-close" class="mb-4 flex items-center text-white focus:outline-none">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" class="mr-2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+      Fechar
+    </button>
+    <nav>
+    <ul class="space-y-4" id="sidebar-menu-mobile">
+      <li id="btn-inicio-mobile" data-section="inicio" class="texto-principal font-medium active">
+        <span class="flex items-center space-x-3">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+          </svg>
+          <span>Início</span>
+        </span>
+      </li>
+      <li data-section="buscar" class="texto-secundario hover:texto-principal">
+        <span class="flex items-center space-x-3">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <span>Buscar</span>
+        </span>
+      </li>
+      <li id="btn-biblioteca-mobile" data-section="biblioteca" class="texto-secundario hover:texto-principal">
+        <span class="flex items-center space-x-3">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+          </svg>
+          <span>Sua Biblioteca</span>
+        </span>
+      </li>
+    </ul>
+  </nav>
+  <div class="mt-10">
+    <h3 class="texto-secundario uppercase text-xs font-bold mb-4">Playlists</h3>
+    <ul class="space-y-3" id="lista-playlists-mobile"></ul>
+    <button id="btn-nova-playlist-mobile" class="mt-4 flex items-center space-x-2 texto-secundario hover:texto-principal">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+      </svg>
+      <span>Criar playlist</span>
+    </button>
+  </div>
+  <div class="sidebar-bottom flex flex-col items-center mt-10">
+    <button id="btn-github-popup-mobile" class="playlist-card flex items-center justify-center w-full mt-6 py-2 px-3 rounded-lg shadow hover:opacity-90 transition-opacity">
+      <svg viewBox="0 0 16 16" fill="currentColor" class="w-6 h-6 mr-2">
+        <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8"/>
+      </svg>
+      <span class="font-semibold">Meu Github</span>
+    </button>
+  </div>
+</div>
+    <div class="main-content flex-1 overflow-y-auto p-6" id="main-content">
+    <div class="flex justify-between items-center mb-8">
+      <div class="relative w-full md:w-1/3">
+        <input type="text" id="campo-busca" placeholder="O que você quer ouvir?" class="w-full bg-white bg-opacity-10 rounded-full py-2 px-4 texto-principal placeholder:texto-secundario focus:outline-none focus:ring-2 focus:ring-green-500">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 absolute right-3 top-2.5 texto-secundario" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+        <div id="resultados-busca"></div>
+      </div>
+      <div class="hidden md:flex items-center space-x-4">
+        <span class="texto-principal font-medium">Meu Perfil</span>
+        <div class="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center">
+          <span class="font-bold">U</span>
+        </div>
+      </div>
+    </div>
+    <div class="mb-10">
+      <h2 class="text-2xl font-bold texto-principal mb-6">Suas playlists</h2>
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6" id="container-playlists"></div>
+    </div>
+    <div class="mb-10">
+      <h2 class="text-2xl font-bold texto-principal mb-6">Recomendadas para você</h2>
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6" id="container-musicas"></div>
+    </div>
+    <div>
+      <h2 class="text-2xl font-bold texto-principal mb-6">Artistas populares</h2>
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6" id="container-artistas"></div>
+    </div>
+  </div>
+</div>
+<div id="modal-playlist" class="fixed inset-0 bg-black bg-opacity-70 hidden items-center justify-center z-50">
+  <div class="bg-[#232323] p-8 rounded-lg shadow-lg w-full max-w-sm">
+    <h2 class="text-xl font-bold mb-4 texto-principal">Criar nova playlist</h2>
+    <input id="nome-playlist" type="text" placeholder="Nome da playlist" class="w-full mb-4 px-3 py-2 rounded bg-[#1a1a1a] texto-principal" autocomplete="off">
+    <div class="flex justify-end space-x-2">
+      <button id="cancelar-playlist" class="px-4 py-2 rounded bg-gray-600 hover:bg-gray-700 text-white">Cancelar</button>
+      <button id="salvar-playlist" type="button" class="px-4 py-2 rounded bg-[#8000ff] hover:bg-[#ae00ff] text-white">Salvar</button>
+    </div>
+    <button id="fechar-modal" class="absolute top-2 right-2 texto-principal">&times;</button>
+  </div>
+</div>
+<div id="modal-gerenciar-playlist" class="fixed inset-0 bg-black bg-opacity-70 hidden items-center justify-center z-50">
+  <div class="bg-[#232323] p-6 rounded-lg shadow-lg w-full max-w-lg relative">
+    <h2 id="titulo-gerenciar-playlist" class="text-xl font-bold mb-4 texto-principal"></h2>
+    <div id="lista-musicas-gerenciar" class="mb-4"></div>
+    <div class="mb-2">
+      <label class="texto-principal block mb-1">Adicionar música:</label>
+      <select id="select-musica" class="w-full px-2 py-1 rounded bg-[#1a1a1a] texto-principal"></select>
+    </div>
+    <div class="flex justify-end space-x-2">
+      <button id="fechar-modal-gerenciar" class="px-4 py-2 rounded bg-gray-600 hover:bg-gray-700 text-white">Fechar</button>
+      <button id="excluir-playlist" class="px-4 py-2 rounded bg-red-700 hover:bg-red-800 text-white ml-2">Excluir Playlist</button>
+      <button id="adicionar-musica" class="px-4 py-2 rounded bg-[#8000ff] hover:bg-[#ae00ff] text-white">Adicionar Música</button>
+    </div>
+  </div>
+</div>
+<div id="github-modal-bg" class="fixed inset-0 hidden items-center justify-center z-50">
+  <div id="github-modal" class="flex items-center justify-center w-full h-full">
+    <div>
+      <div class="github-cards-merged">
+        <img src="../imagens/github2.jpg" alt="Sasuke" class="github-merged-avatar" />
+        <img src="../imagens/github1.jpg" alt="Naruto" class="github-merged-avatar" />
+      </div>
+      <div style="display: flex; justify-content: center; gap: 48px;">
+        <div style="text-align:center; color: #fff;">
+          <div style="font-weight:700;font-size:1.1rem;">@micael</div>
+          <a href="https://github.com/micaelMR10" target="_blank" class="github-link" style="margin-top:8px; margin-bottom:0;">
+            <svg width="18" height="18" fill="currentColor" viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8"/></svg>
+            github.com/micaelMR10
+          </a>
+        </div>
+        <div style="text-align:center; color: #fff;">
+          <div style="font-weight:700;font-size:1.1rem;">@dudumilan</div>
+          <a href="https://github.com/dudumilan" target="_blank" class="github-link" style="margin-top:8px; margin-bottom:0;">
+            <svg width="18" height="18" fill="currentColor" viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8"/></svg>
+            github.com/dudumilan
+          </a>
+        </div>
+      </div>
+      <button class="github-close" id="github-close">Fechar</button>
+    </div>
+  </div>
+</div>
+<div class="player flex items-center justify-between px-4 py-3">
+  <div class="flex items-center space-x-4 w-1/4">
+    <img id="capa-musica-atual" src="https://via.placeholder.com/56" alt="Capa da música" class="w-14 h-14 rounded">
+    <div>
+      <p id="nome-musica-atual" class="texto-principal text-sm font-medium">Nenhuma música selecionada</p>
+      <p id="artista-musica-atual" class="texto-secundario text-xs">Selecione uma música para começar</p>
+    </div>
+  </div>
+  <div class="flex flex-col items-center w-2/4">
+    <div class="flex items-center space-x-6 mb-2">
+      <button class="texto-secundario hover:texto-principal" id="btn-prev">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+        </svg>
+      </button>
+      <button id="btn-play" class="bg-white rounded-full p-2 hover:scale-105 transition-transform">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-black" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" />
+        </svg>
+      </button>
+      <button class="texto-secundario hover:texto-principal" id="btn-next">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+        </svg>
+      </button>
+    </div>
+    <div class="w-full flex items-center space-x-3">
+      <span class="text-xs texto-secundario" id="tempo-atual">0:00</span>
+      <input type="range" min="0" max="100" value="0" class="progresso-musica w-full" id="barra-progresso">
+      <span class="text-xs texto-secundario" id="tempo-total">0:30</span>
+    </div>
+  </div>
+  <div class="flex items-center space-x-4 w-1/4 justify-end">
+    <button id="btn-vol-down" class="texto-secundario hover:texto-principal" title="Diminuir volume">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+        <path d="M6 15H3V9h3l4-4v14l-4-4Z" />
+      </svg>
+    </button>
+    <input id="volume-barra" type="range" min="0" max="100" value="80" class="w-24 h-1 mx-1">
+    <button id="btn-vol-up" class="texto-secundario hover:texto-principal" title="Aumentar volume">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+        <path d="M6 15H3V9h3l4-4v14l-4-4ZM16 8v8M20 10v4" />
+      </svg>
+    </button>
+  </div>
+</div>
+<script>
+class MCMusicPlayer {
+  constructor(musicas, artistas, playlists) {
+    this.musicas = musicas;
+    this.artistas = artistas;
+    this.playlists = playlists;
+    this.likes = JSON.parse(localStorage.getItem('mc_likes') || "[]");
+    this.ensureCurtidasPlaylist();
+    this.estado = {
+      musicaAtual: null,
+      playlists: this.playlists,
+      playlistsSidebar: [...this.playlists],
+      playlistsModal: [],
+      musicaParaAdicionar: null,
+      isPlaying: false,
+      progresso: 0,
+      intervaloProgresso: null,
+      audioElement: new Audio(),
+      musicasExibidas: [],
+      playlistGerenciada: null,
+    };
+    document.addEventListener('DOMContentLoaded', function() {
+  const sidebarMobile = document.getElementById('sidebar-mobile');
+  const sidebarBackdrop = document.getElementById('sidebar-backdrop');
+  const btnSidebarOpen = document.getElementById('btn-sidebar-open');
+  const btnSidebarClose = document.getElementById('btn-sidebar-close');
+  btnSidebarOpen.addEventListener('click', function() {
+    sidebarMobile.classList.add('open');
+    sidebarBackdrop.classList.add('open');
+  });
+  btnSidebarClose.addEventListener('click', function() {
+    sidebarMobile.classList.remove('open');
+    sidebarBackdrop.classList.remove('open');
+  });
+  sidebarBackdrop.addEventListener('click', function() {
+    sidebarMobile.classList.remove('open');
+    sidebarBackdrop.classList.remove('open');
+  });
+});
+    this.elementos = {
+      containerMusicas: document.getElementById('container-musicas'),
+      containerArtistas: document.getElementById('container-artistas'),
+      containerPlaylists: document.getElementById('container-playlists'),
+      listaPlaylists: document.getElementById('lista-playlists'),
+      listaPlaylistsModal: document.getElementById('lista-playlists-modal'),
+      btnNovaPlaylist: document.getElementById('btn-nova-playlist'),
+      modalPlaylist: document.getElementById('modal-playlist'),
+      modalAdicionarPlaylist: document.getElementById('modal-adicionar-playlist'),
+      nomePlaylist: document.getElementById('nome-playlist'),
+      salvarPlaylist: document.getElementById('salvar-playlist'),
+      cancelarPlaylist: document.getElementById('cancelar-playlist'),
+      fecharModal: document.getElementById('fechar-modal'),
+      fecharModalAdicionar: document.getElementById('fechar-modal-adicionar'),
+      cancelarAdicionar: document.getElementById('cancelar-adicionar'),
+      musicaSelecionada: document.getElementById('musica-selecionada'),
+      campoBusca: document.getElementById('campo-busca'),
+      nomeMusicaAtual: document.getElementById('nome-musica-atual'),
+      artistaMusicaAtual: document.getElementById('artista-musica-atual'),
+      capaMusicaAtual: document.getElementById('capa-musica-atual'),
+      btnPlay: document.getElementById('btn-play'),
+      barraProgresso: document.getElementById('barra-progresso'),
+      tempoAtual: document.getElementById('tempo-atual'),
+      tempoTotal: document.getElementById('tempo-total'),
+      volumeBar: document.getElementById('volume-barra'),
+      btnVolUp: document.getElementById('btn-vol-up'),
+      btnVolDown: document.getElementById('btn-vol-down'),
+      btnPrev: document.getElementById('btn-prev'),
+      btnNext: document.getElementById('btn-next'),
+      modalGerenciarPlaylist: document.getElementById('modal-gerenciar-playlist'),
+      tituloGerenciarPlaylist: document.getElementById('titulo-gerenciar-playlist'),
+      listaMusicasGerenciar: document.getElementById('lista-musicas-gerenciar'),
+      selectMusica: document.getElementById('select-musica'),
+      adicionarMusica: document.getElementById('adicionar-musica'),
+      fecharModalGerenciar: document.getElementById('fechar-modal-gerenciar'),
+      excluirPlaylist: document.getElementById('excluir-playlist'),
+      resultadosBusca: document.getElementById('resultados-busca')
+    };
+    this.setupBusca();
+  }
+
+  setupBusca() {
+    const resultados = document.getElementById('resultados-busca');
+    this.elementos.campoBusca.addEventListener('input', (e) => {
+      const termo = e.target.value.trim().toLowerCase();
+      if (termo === "") {
+        resultados.style.display = "none";
+        this.renderizarMusicas(this.musicas);
+        return;
+      }
+      const normaliza = s => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+      const filtradas = this.musicas.filter(m =>
+        normaliza(m.nome).includes(normaliza(termo)) ||
+        normaliza(m.artista).includes(normaliza(termo))
+      );
+      if (filtradas.length > 0) {
+        resultados.innerHTML = filtradas.map(m => `
+          <div class="hover:bg-[#8000ff22] cursor-pointer px-4 py-2 flex items-center gap-3" data-id="${m.id}">
+            <img src="${m.capa}" style="width:40px;height:40px;object-fit:cover;border-radius:8px;">
+            <div>
+              <div style="color:#fff;font-weight:500">${m.nome}</div>
+              <div style="color:#b3b3b3;font-size:0.9em">${m.artista}</div>
+            </div>
+          </div>
+        `).join('');
+        resultados.style.display = "block";
+        resultados.querySelectorAll('div[data-id]').forEach(div => {
+          div.onclick = () => {
+            const musica = this.musicas.find(m => m.id == div.getAttribute('data-id'));
+            this.elementos.campoBusca.value = musica.nome;
+            resultados.style.display = "none";
+            this.renderizarMusicas([musica]);
+            this.tocarMusica(musica.id);
+          };
+        });
+      } else {
+        resultados.innerHTML = `<div style="color:#b3b3b3;padding:0.75rem 1rem;">Nenhuma música encontrada</div>`;
+        resultados.style.display = "block";
+      }
+      this.renderizarMusicas(filtradas);
+    });
+    document.addEventListener('click', (ev) => {
+      if (!this.elementos.campoBusca.contains(ev.target) && !resultados.contains(ev.target)) {
+        resultados.style.display = "none";
+      }
+    });
+  }
+
+  ensureCurtidasPlaylist() {
+    let curtidas = this.playlists.find(p => p.nome === "Curtidas");
+    if (!curtidas) {
+      this.playlists.unshift({ id: 0, nome: "Curtidas", musicas: this.likes });
+    } else {
+      curtidas.musicas = this.likes;
+    }
+  }
+  isLiked(id) { return this.likes.includes(id); }
+  toggleLike(id) {
+    if (this.isLiked(id)) this.likes = this.likes.filter(m => m !== id);
+    else this.likes.push(id);
+    let curtidas = this.playlists.find(p => p.nome === "Curtidas");
+    if (curtidas) curtidas.musicas = [...this.likes];
+    localStorage.setItem('mc_likes', JSON.stringify(this.likes));
+    this.renderizarMusicas(this.estado.musicasExibidas.length ? this.estado.musicasExibidas : this.musicas);
+    this.renderizarPlaylists();
+  }
+  renderizarMusicas(musicasMostradas = this.musicas) {
+    this.elementos.containerMusicas.innerHTML = '';
+    musicasMostradas.forEach(musica => {
+      const musicaElement = document.createElement('div');
+      musicaElement.className = 'card-musica bg-gray-800 p-4 rounded-lg cursor-pointer hover:bg-gray-700 transition-colors relative';
+      musicaElement.innerHTML = `
+        <button class="like-btn${this.isLiked(musica.id) ? ' liked' : ''}" title="Curtir/descurtir">
+          <svg viewBox="0 0 24 24"><path d="M12 21s-7-5.2-7-10.1c0-2.6 2.1-4.9 4.7-4.9 1.6 0 3.3 1.2 3.3 1.2s1.7-1.2 3.3-1.2c2.6 0 4.7 2.3 4.7 4.9C19 15.8 12 21 12 21z"/></svg>
+        </button>
+        <div class="relative mb-4">
+          <img src="${musica.capa}" alt="${musica.nome}" class="w-full aspect-square object-cover rounded">
+        </div>
+        <h3 class="texto-principal font-medium truncate">${musica.nome}</h3>
+        <p class="texto-secundario text-sm truncate">${musica.artista}</p>
+      `;
+      musicaElement.querySelector('.like-btn').onclick = (e) => {
+        e.stopPropagation();
+        this.toggleLike(musica.id);
+      };
+      musicaElement.onclick = () => this.tocarMusica(musica.id);
+      this.elementos.containerMusicas.appendChild(musicaElement);
+    });
+    this.estado.musicasExibidas = musicasMostradas.slice();
+  }
+  renderizarPlaylists() {
+    this.ensureCurtidasPlaylist();
+    this.elementos.containerPlaylists.innerHTML = '';
+    this.estado.playlists.forEach(playlist => {
+      const playlistElement = document.createElement('div');
+      playlistElement.className = 'playlist-card p-4 rounded-lg cursor-pointer hover:opacity-90 transition-opacity relative group';
+      playlistElement.innerHTML = `
+        <div class="mb-3">
+          <div class="w-full aspect-square bg-black bg-opacity-20 rounded flex items-center justify-center">
+            ${playlist.nome === "Curtidas"
+              ? `<svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-pink-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 21s-7-5.2-7-10.1c0-2.6 2.1-4.9 4.7-4.9 1.6 0 3.3 1.2 3.3 1.2s1.7-1.2 3.3-1.2c2.6 0 4.7 2.3 4.7 4.9C19 15.8 12 21 12 21z"/></svg>`
+              : `<svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+                </svg>`
+            }
+          </div>
+        </div>
+        <h3 class="texto-principal font-medium truncate">${playlist.nome}</h3>
+        <p class="texto-secundario text-sm">${playlist.musicas.length} músicas</p>
+        ${playlist.nome !== "Curtidas" ? `<button class="absolute top-2 right-2 px-2 py-1 rounded bg-[#8000ff] text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity" data-id="${playlist.id}" style="z-index:2">Gerenciar</button>` : ""}
+      `;
+      playlistElement.onclick = (e) => {
+        if (e.target.tagName === 'BUTTON') {
+          e.stopPropagation();
+          this.abrirModalGerenciarPlaylist(playlist.id);
+        } else {
+          this.filtrarPorPlaylist(playlist.id);
+        }
+      };
+      this.elementos.containerPlaylists.appendChild(playlistElement);
+    });
+
+    this.elementos.listaPlaylists.innerHTML = '';
+    this.estado.playlistsSidebar.forEach(playlist => {
+      const playlistElement = document.createElement('li');
+      playlistElement.className = 'texto-secundario hover:texto-principal cursor-pointer truncate';
+      playlistElement.textContent = playlist.nome;
+      playlistElement.onclick = () => this.filtrarPorPlaylist(playlist.id);
+      this.elementos.listaPlaylists.appendChild(playlistElement);
+    });
+  }
+  renderizarArtistas() {
+    this.elementos.containerArtistas.innerHTML = '';
+    const verTodos = document.createElement('div');
+    verTodos.className = 'bg-purple-800 p-4 rounded-full cursor-pointer hover:bg-purple-700 transition-colors text-center';
+    verTodos.innerHTML = `
+      <div class="w-full aspect-square mb-3 flex items-center justify-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 19v-6a2 2 0 012-2h6a2 2 0 012 2v6m0 0V5a2 2 0 00-2-2H6a2 2 0 00-2 2v14a2 2 0 002 2h6a2 2 0 002-2z" /></svg>
+      </div>
+      <h3 class="texto-principal font-medium">Todos</h3>
+      <p class="texto-secundario text-sm">Ver todos</p>
+    `;
+    verTodos.onclick = () => this.renderizarMusicas();
+    this.elementos.containerArtistas.appendChild(verTodos);
+
+    this.artistas.forEach(artista => {
+      const artistaElement = document.createElement('div');
+      artistaElement.className = 'bg-gray-800 p-4 rounded-full cursor-pointer hover:bg-gray-700 transition-colors text-center';
+      artistaElement.innerHTML = `
+        <div class="w-full aspect-square mb-3">
+          <img src="${artista.foto}" alt="${artista.nome}" class="w-full h-full rounded-full object-cover">
+        </div>
+        <h3 class="texto-principal font-medium">${artista.nome}</h3>
+        <p class="texto-secundario text-sm">Artista</p>
+      `;
+      artistaElement.onclick = () => {
+        const musicasDoArtista = this.musicas.filter(m => m.artista === artista.nome);
+        this.renderizarMusicas(musicasDoArtista);
+      };
+      this.elementos.containerArtistas.appendChild(artistaElement);
+    });
+  }
+  tocarMusica(id) {
+    const musica = this.musicas.find(m => m.id === id);
+    if (!musica) return;
+    this.estado.musicaAtual = musica;
+    this.estado.isPlaying = true;
+    this.elementos.nomeMusicaAtual.textContent = musica.nome;
+    this.elementos.artistaMusicaAtual.textContent = musica.artista;
+    this.elementos.capaMusicaAtual.src = musica.capa;
+    this.elementos.tempoTotal.textContent = musica.duracao;
+    this.estado.audioElement.src = musica.src;
+    this.estado.audioElement.load();
+    this.estado.audioElement.play();
+    this.atualizarBtnPlay(true);
+    this.atualizarProgresso();
+    if (this.estado.musicasExibidas.length === 0) {
+      this.estado.musicasExibidas = this.musicas.slice();
+    }
+  }
+  pausarMusica() {
+    this.estado.isPlaying = false;
+    this.estado.audioElement.pause();
+    this.atualizarBtnPlay(false);
+  }
+  atualizarBtnPlay(isPlaying) {
+    if (isPlaying) {
+      this.elementos.btnPlay.innerHTML = `
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-black" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 000 16zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+      </svg>`;
+    } else {
+      this.elementos.btnPlay.innerHTML = `
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-black" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" />
+      </svg>`;
+    }
+  }
+  formatarTempo(tempo) {
+    const minutos = Math.floor(tempo / 60);
+    const segundos = Math.floor(tempo % 60);
+    return `${minutos < 10 ? '0' : ''}${minutos}:${segundos < 10 ? '0' : ''}${segundos}`;
+  }
+  atualizarProgresso() {
+    const audioElement = this.estado.audioElement;
+    clearInterval(this.estado.intervaloProgresso);
+    this.estado.intervaloProgresso = setInterval(() => {
+      if (this.estado.isPlaying) {
+        const tempoAtual = audioElement.currentTime;
+        const duracao = audioElement.duration;
+        if (isNaN(duracao)) return;
+        const progresso = (tempoAtual / duracao) * 100;
+        this.elementos.barraProgresso.value = progresso;
+        this.elementos.tempoAtual.textContent = this.formatarTempo(tempoAtual);
+        this.elementos.tempoTotal.textContent = this.formatarTempo(duracao);
+      }
+    }, 500);
+  }
+  tocarProxima() {
+    const lista = this.estado.musicasExibidas && this.estado.musicasExibidas.length > 0 ? this.estado.musicasExibidas : this.musicas;
+    const atual = lista.findIndex(m => m.id === this.estado.musicaAtual?.id);
+    if (atual !== -1 && atual < lista.length - 1) {
+      this.tocarMusica(lista[atual + 1].id);
+    }
+  }
+  tocarAnterior() {
+    const lista = this.estado.musicasExibidas && this.estado.musicasExibidas.length > 0 ? this.estado.musicasExibidas : this.musicas;
+    const atual = lista.findIndex(m => m.id === this.estado.musicaAtual?.id);
+    if (atual > 0) {
+      this.tocarMusica(lista[atual - 1].id);
+    }
+  }
+  abrirModalGerenciarPlaylist(playlistId) {
+    this.estado.playlistGerenciada = playlistId;
+    const playlist = this.estado.playlists.find(p => p.id === playlistId);
+    this.elementos.tituloGerenciarPlaylist.textContent = "Gerenciar: " + playlist.nome;
+    this.renderizarListaMusicasGerenciar(playlist);
+    this.renderizarSelectMusica(playlist);
+    this.elementos.modalGerenciarPlaylist.classList.remove('hidden');
+  }
+  renderizarListaMusicasGerenciar(playlist) {
+    const lista = document.createElement('ul');
+    lista.className = "mb-2";
+    playlist.musicas.forEach(idMusica => {
+      const musica = this.musicas.find(m => m.id === idMusica);
+      if (!musica) return;
+      const li = document.createElement('li');
+      li.className = "flex items-center justify-between mb-1 bg-[#181818] px-2 py-1 rounded";
+      li.innerHTML = `
+        <span>${musica.nome} - <span class="texto-secundario">${musica.artista}</span></span>
+        <button data-id="${idMusica}" class="remover-musica px-2 py-1 rounded bg-red-700 text-xs text-white hover:bg-red-900">Remover</button>
+      `;
+      lista.appendChild(li);
+    });
+    this.elementos.listaMusicasGerenciar.innerHTML = '';
+    this.elementos.listaMusicasGerenciar.appendChild(lista);
+    lista.querySelectorAll('.remover-musica').forEach(btn => {
+      btn.onclick = (e) => {
+        const idMusica = parseInt(btn.getAttribute('data-id'));
+        this.removerMusicaDaPlaylist(this.estado.playlistGerenciada, idMusica);
+      };
+    });
+  }
+  renderizarSelectMusica(playlist) {
+    const select = this.elementos.selectMusica;
+    select.innerHTML = '';
+    this.musicas.forEach(musica => {
+      if (!playlist.musicas.includes(musica.id)) {
+        const opt = document.createElement('option');
+        opt.value = musica.id;
+        opt.textContent = `${musica.nome} - ${musica.artista}`;
+        select.appendChild(opt);
+      }
+    });
+  }
+  adicionarMusicaNaPlaylist(playlistId, musicaId) {
+    const playlist = this.estado.playlists.find(p => p.id === playlistId);
+    musicaId = parseInt(musicaId);
+    if (playlist && !playlist.musicas.includes(musicaId)) {
+      playlist.musicas.push(musicaId);
+      this.renderizarListaMusicasGerenciar(playlist);
+      this.renderizarSelectMusica(playlist);
+      this.renderizarPlaylists();
+    }
+  }
+  removerMusicaDaPlaylist(playlistId, musicaId) {
+    const playlist = this.estado.playlists.find(p => p.id === playlistId);
+    if (playlist) {
+      playlist.musicas = playlist.musicas.filter(id => id !== musicaId);
+      this.renderizarListaMusicasGerenciar(playlist);
+      this.renderizarSelectMusica(playlist);
+      this.renderizarPlaylists();
+    }
+  }
+  excluirPlaylist(playlistId) {
+    this.estado.playlists = this.estado.playlists.filter(p => p.id !== playlistId);
+    this.estado.playlistsSidebar = this.estado.playlistsSidebar.filter(p => p.id !== playlistId);
+    this.renderizarPlaylists();
+    this.elementos.modalGerenciarPlaylist.classList.add('hidden');
+  }
+  inicializar() {
+    this.renderizarMusicas();
+    this.renderizarArtistas();
+    this.renderizarPlaylists();
+    this.elementos.btnNovaPlaylist.onclick = () => this.elementos.modalPlaylist.classList.remove('hidden');
+    this.elementos.fecharModal.onclick = this.elementos.cancelarPlaylist.onclick = () => this.elementos.modalPlaylist.classList.add('hidden');
+    this.elementos.salvarPlaylist.onclick = (e) => {
+      e.preventDefault();
+      const nome = this.elementos.nomePlaylist.value.trim();
+      if (!nome) return;
+      const novaPlaylist = { id: Date.now(), nome, musicas: [] };
+      this.estado.playlists.push(novaPlaylist);
+      this.estado.playlistsSidebar = this.estado.playlists.slice();
+      this.renderizarPlaylists();
+      this.elementos.modalPlaylist.classList.add('hidden');
+      this.elementos.nomePlaylist.value = '';
+    };
+    this.elementos.adicionarMusica.onclick = () => {
+      const playlistId = this.estado.playlistGerenciada;
+      const musicaId = this.elementos.selectMusica.value;
+      if (musicaId) this.adicionarMusicaNaPlaylist(playlistId, musicaId);
+    };
+    this.elementos.fecharModalGerenciar.onclick = () => {
+      this.elementos.modalGerenciarPlaylist.classList.add('hidden');
+      this.estado.playlistGerenciada = null;
+    };
+    this.elementos.excluirPlaylist.onclick = () => {
+      if (confirm('Deseja realmente excluir esta playlist?')) {
+        this.excluirPlaylist(this.estado.playlistGerenciada);
+        this.estado.playlistGerenciada = null;
+      }
+    };
+    this.elementos.volumeBar.addEventListener('input', (e) => {
+      this.estado.audioElement.volume = e.target.value / 100;
+    });
+    this.elementos.btnVolUp.onclick = () => {
+      let v = parseInt(this.elementos.volumeBar.value);
+      v = Math.min(100, v + 10);
+      this.elementos.volumeBar.value = v;
+      this.estado.audioElement.volume = v / 100;
+    };
+    this.elementos.btnVolDown.onclick = () => {
+      let v = parseInt(this.elementos.volumeBar.value);
+      v = Math.max(0, v - 10);
+      this.elementos.volumeBar.value = v;
+      this.estado.audioElement.volume = v / 100;
+    };
+    this.elementos.btnPlay.onclick = () => {
+  if (this.estado.isPlaying) {
+    this.pausarMusica();
+  } else if (this.estado.musicaAtual) {
+    this.estado.audioElement.play();
+    this.estado.isPlaying = true;
+    this.atualizarBtnPlay(true);
+    this.atualizarProgresso();
+  }
+};
+    this.elementos.barraProgresso.addEventListener('input', (e) => {
+      if (!this.estado.musicaAtual) return;
+      const audio = this.estado.audioElement;
+      const duracao = audio.duration;
+      if (isNaN(duracao)) return;
+      const novoTempo = (e.target.value / 100) * duracao;
+      audio.currentTime = novoTempo;
+      this.elementos.tempoAtual.textContent = this.formatarTempo(novoTempo);
+    });
+    this.elementos.btnNext.onclick = () => this.tocarProxima();
+    this.elementos.btnPrev.onclick = () => this.tocarAnterior();
+    this.elementos.listaPlaylists.onclick = e => {
+      const li = e.target.closest('li');
+      if (li) {
+        const nome = li.textContent;
+        const pl = this.estado.playlists.find(p => p.nome === nome);
+        if (pl) this.filtrarPorPlaylist(pl.id);
+      }
+    };
+  }
+  exibirPrateleira() {
+    this.elementos.containerMusicas.innerHTML = '';
+    this.musicas.forEach(musica => {
+      const musicaElement = document.createElement('div');
+      musicaElement.className = 'card-musica bg-gray-800 p-4 rounded-lg cursor-pointer hover:bg-gray-700 transition-colors flex flex-col items-center relative';
+      musicaElement.innerHTML = `
+        <button class="like-btn${this.isLiked(musica.id) ? ' liked' : ''}" title="Curtir/descurtir">
+          <svg viewBox="0 0 24 24"><path d="M12 21s-7-5.2-7-10.1c0-2.6 2.1-4.9 4.7-4.9 1.6 0 3.3 1.2 3.3 1.2s1.7-1.2 3.3-1.2c2.6 0 4.7 2.3 4.7 4.9C19 15.8 12 21 12 21z"/></svg>
+        </button>
+        <img src="${musica.capa}" alt="${musica.nome}" class="w-full aspect-square object-cover rounded mb-2">
+        <h3 class="texto-principal font-medium truncate text-center">${musica.nome}</h3>
+        <p class="texto-secundario text-sm truncate text-center">${musica.artista}</p>
+      `;
+      musicaElement.querySelector('.like-btn').onclick = (e) => {
+        e.stopPropagation();
+        this.toggleLike(musica.id);
+      };
+      musicaElement.onclick = () => this.tocarMusica(musica.id);
+      this.elementos.containerMusicas.appendChild(musicaElement);
+    });
+  }
+  filtrarPorPlaylist(playlistId) {
+    const playlist = this.estado.playlists.find(p => p.id === playlistId);
+    if (!playlist) return;
+    const musicasFiltradas = this.musicas.filter(m => playlist.musicas.includes(m.id));
+    this.renderizarMusicas(musicasFiltradas);
+  }
+}
+const musicas = [
+  { id: 1, nome: "We Are The Champions", artista: "Queen", duracao: "3:10", capa: "../imagens/we are the champions.jpg", src: "../musicas/we are the champions.mp3" },
+  { id: 2, nome: "Evidências", artista: "Chitãozinho & Xororó", duracao: "4:41", capa: "../imagens/evidencias.jpg", src: "../musicas/evidencias.mp3" },
+  { id: 3, nome: "I Ran", artista: "A Flock Of Seagulls", duracao: "3:58", capa: "../imagens/i ran.jpg", src: "../musicas/I Ran.mp3" },
+  { id: 4, nome: "Não Quero Dinheiro", artista: "Tim Maia", duracao: "2:34", capa: "../imagens/tim maia.jpg", src: "../musicas/nao quero dinheiro.mp3" },
+  { id: 5, nome: "Bohemian Rhapsody", artista: "Queen", duracao: "6:00", capa: "../imagens/bohemian.jpg", src: "../musicas/bohemian.mp3"},
+  { id: 6, nome: "Nope your too late i already died", artista: "wifiskeleton", duracao: "1:30", capa: "../imagens/to late.jpg", src: "../musicas/to late.mp3"},
+  { id: 7, nome: "Mina Do Meu Condominio", artista: "Seu Jorge", duracao: "6:40", capa: "../imagens/condo.png", src: "../musicas/condo.mp3"},
+  { id: 8, nome: "505", artista: "Arctic Monkeys", duracao: "4:13", capa: "../imagens/505.png", src: "../musicas/505.mp3"},
+  { id: 9, nome: "Feel Good", artista: "Gorillaz", duracao: "6:00", capa: "../imagens/fe go.jpg", src: "../musicas/fe go.mp3"},
+  { id: 10, nome: "Pelados Em Santos", artista: "Mamonas Assassinas", duracao: "6:00", capa: "../imagens/mamonas assasinas.jpg", src: "../musicas/santos.mp3"},
+  { id: 11, nome: "Nameless World", artista: "Skip The Use", duracao: "6:00", capa: "../imagens/name.png", src: "../musicas/name.mp3"},
+  { id: 12, nome: "Take Me Out", artista: "Franz Ferdinand", duracao: "6:00", capa: "../imagens/take.jpg", src: "../musicas/take.mp3"},
+  { id: 13, nome: "Washing Machine Heart", artista: "Mitski", duracao: "6:00", capa: "../imagens/heart.jpg", src: "../musicas/heart.mp3"},
+  { id: 14, nome: "back to friends", artista: "sombr", duracao: "6:00", capa: "../imagens/back.jpg", src: "../musicas/back.mp3"},
+  { id: 15, nome: "Love Train", artista: "The O'Jays", duracao: "6:00", capa: "../imagens/love.jpg", src: "../musicas/love.mp3"},
+  { id: 17, nome: "Sopa Nas Candjanga", artista: "", duracao: "3:15", capa: "../imagens/", src: "../musicas/"},
+  { id: 18, nome: "Só você", artista: "Fábio Jr", duracao: "3:15", capa: "../imagens/", src: "../musicas/"},
+];
+const artistas = [
+  { id: 1, nome: "Queen", foto: "../imagens/queen.png" },
+  { id: 2, nome: "Chitãozinho & Xororó", foto: "../imagens/chitao.jpg" },
+  { id: 3, nome: "Tim Maia", foto: "../imagens/Tim mai.jpg" }
+];
+const playlists = [
+  { id: 1, nome: "Favoritas", musicas: [1, 3] },
+  { id: 2, nome: "Sertanejo", musicas: [2] },
+  { id: 3, nome: "Pro Greg", musicas: [] }
+];
+const player = new MCMusicPlayer(musicas, artistas, playlists);
+document.addEventListener('DOMContentLoaded', () => {
+  player.inicializar();
+  document.getElementById('btn-github-popup').onclick = function() {
+    document.getElementById('github-modal-bg').classList.remove('hidden');
+    document.getElementById('github-modal-bg').classList.add('flex');
+  };
+  document.getElementById('github-close').onclick = function() {
+    document.getElementById('github-modal-bg').classList.add('hidden');
+    document.getElementById('github-modal-bg').classList.remove('flex');
+  };
+  document.getElementById('github-modal-bg').onclick = function(e) {
+    if (e.target === this) {
+      this.classList.add('hidden');
+      this.classList.remove('flex');
+    }
+  };
+  document.getElementById('btn-inicio').onclick = function() {
+    player.renderizarMusicas();
+    player.renderizarArtistas();
+    player.renderizarPlaylists();
+  };
+  document.getElementById('btn-biblioteca').onclick = function() {
+    player.exibirPrateleira();
+  };
+});
+document.addEventListener('DOMContentLoaded', function() {
+  setTimeout(function() {
+    document.getElementById('intro').style.display = 'none';
+  }, 3000);
+});
+</script>
+</body>
+</html>
