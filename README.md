@@ -50,7 +50,7 @@ O arquivo é autossuficiente, carregando todos os elementos da interface e scrip
 
 ## Créditos
 
-- Desenvolvido por [@dudumilan](https://github.com/dudumilan) e [@micaelMR10](https://github.com/micaelMR10).
+- Desenvolvido por [@dudumilan](https://github.com/dudumilan)
 - Imagens e estilos com inspiração em grandes plataformas de streaming musical.
 
 ---
